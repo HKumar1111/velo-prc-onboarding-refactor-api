@@ -1,0 +1,166 @@
+environment: "uat"
+http:
+  host: "uatopenapi.velobank.com" 
+  port: "443"
+  listener:
+    port: "8091"
+    
+trulioo:
+  idauthentication:
+    path: "api/process/customerverification/truliooauthentication"
+
+fis:
+  host: "uatopenapi.velobank.com"
+  port: "443"
+  getProfile: "/api/system/customers/{cis}/profile"
+
+initiateSms:
+    path: "api/process/initiatecomm/send"
+tokenize:
+  cache:
+    ttl: "30"
+  credentials:
+    username: "APP_ThalesENCP_DEV"
+    password: "A3%D0mf9+@Ym"      
+    
+partner:
+  accountcreate:
+    path: "api/process/partner/account/create"
+  caseApproved:
+    path: "api/process/partner/account/case/update"  
+  caseUpdate:
+    path:  "api/process/crm/{caseId}/update"
+  notification:
+    path: "api/process/notification/retry"
+          
+bbaeEndPoint:
+  host: "transformer-openapi--qa-01.bbaecache.com"
+  updateApplication:
+    #host: "transformer-web--develop-03.bbaecache.com"
+    #path: "api/v2/veloAccount/updateApplication"
+    path: "v2/velo/updateAccountApplication"
+  createSession:
+    #host: "transformer-openapi--develop-03.bbaecache.com"
+    path: "v2/security/createSession"
+    basicAuth: "Basic YmJhZS1kZW1vOk5vcm1hbmR5"
+  endSession:
+    #host: "transformer-openapi--develop-03.bbaecache.com"
+    path: "v2/security/logout"
+webullEndPoint:
+  host: "pre-tradeapi.webulltrade.com"
+  appKey: "velobank"
+  appSecret: "4546231d9975c4d765f6e5c15607b93fead1324f1f83ed509bef9dd00d36a08e"
+  updateApplication:    
+    #path: "trade/api/velobank/onboarding/APP-M-19724/status"
+    path: "trade/api/velobank/onboarding/{reqUUID}/status"
+    
+variables:
+  IS_V1_ENABLED: "false"
+  APPLICATION:
+    TYPE: 
+      "CREATE": "Create"
+      "UPDATE": "Update"
+      "API" : "PartnerAPI"
+    STATUS:
+      "APPROVED": "Approved"
+      "PENDING": "Pending"
+      "DENIED": "Denied"
+      "DECLINED": "Declined"
+      TECHNICALERROR: "TechError"
+  caseStatus:
+    PENDING: "Pending"
+    APPROVED: "Approved"
+  PARTNER_INFO:    
+    WEBULL_PARTNER_ID: "31000112989176"
+    BBAE_PARTNER_ID: "31000112989075"
+    TIGER_PARTNER_ID: "31000112889077"
+    FUTU_PARTNER_ID: "31000332999078"
+    VELOBANK_PARTNER_ID: "31000332666079"
+    PARTNER_WHITELISTED: [ '31000112989176', '31000112989075', '31000112889077', '31000332999078', '31000332666079']
+  #Intervals in miliseconds
+  TIME_INTERVALS:
+    ONE_MINUTE: "60000"
+    ONE_HOUR: "3600000"
+    TWO_SECOND: "2000"
+    SIX_SECOND: "6000"
+    
+RETRIES_INTERVALS:
+  PROCESS_API_CALL: ${variables.TIME_INTERVALS.ONE_MINUTE}  
+  PARTNER_UPDATE_API_CALL: ${variables.TIME_INTERVALS.ONE_MINUTE}
+  SF_CONNECTER_RETRY: ${variables.TIME_INTERVALS.SIX_SECOND}
+  MAX_RETRIES: "3"
+    
+api:
+  id: "15705861"
+  
+json:
+  logger:
+    application:
+      name: ${project.artifactId}
+      version: ${project.version}
+      
+salesforce:
+  username: "api.user@eastwestbank.com.uat"
+  password: "Velo@EWB$1"
+  token: "dMjjmng69kw7MF1I4HfB3Oi3"
+  url: "https://test.salesforce.com/services/Soap/u/42.0"
+  readTimeOutMillisecond: "20000"
+  
+mq:
+  okta-events: "velo-okta-events"
+  url: "https://mq-us-west-2.anypoint.mulesoft.com/api/v1"
+  client-id: "62f83406fc2b4b4e840640696e084b0b"
+  client-secret: "50ea7608CB164d6c98E2A51ECa9B76Dd"
+  
+oauth:
+  grant_type: password
+  client_id: "3MVG9Yb5IgqnkB4ovsepzbqXZ6O1E.pCa2_YTY82dqBhQG2qbut1O9AIKnqlmKR7EVBCJFFsStAe1YXQz.gO0"
+  client_secret: "4930736754474379816"
+  token_url: "https://test.salesforce.com/services/oauth2/token"
+  username: "api.user@eastwestbank.com.uat"
+  password: "Velo@EWB$1dMjjmng69kw7MF1I4HfB3Oi3"
+  host: "test.salesforce.com"
+  path: "/services/oauth2/token"
+  expiry_duration_sec: "230"
+  
+terafina:
+  host: "uat-eastwestbank.cs95.force.com"  
+  caseUpdate:
+    path: "services/apexrest/CaseUpdate/v1"
+
+response:
+  timeout:
+    oneMinute: "60000"
+    oneHalfMinute: "90000"
+    twoMinute: "120000"
+    threeMinute: "180000"
+
+# ACCOUNT MAPPING FOR SALESFORCE
+ACCOUNT_TYPE:
+  CUP_CARD:
+    CODE: "CUP"
+  CHK_I_VELO:
+    CODE: "Checking"
+  CHK_I_PERS_PREMIER:
+    CODE: "Saving" 
+  CHK_I_VELO_STUDENT:
+    CODE: "Checking"   
+  DEFAULT:
+    CODE: "Unknown"
+
+#Name Length Variables
+NAME:
+  CHN_FIRST_NAME_MIN_LENGTH: "1"
+  CHN_FIRST_NAME_MAX_LENGTH: "20"
+  CHN_LAST_NAME_MIN_LENGTH: "1"
+  CHN_LAST_NAME_MAX_LENGTH: "19"
+  ENG_FIRST_NAME_MIN_LENGTH: "2"
+  ENG_FIRST_NAME_MAX_LENGTH: "20"
+  ENG_LAST_NAME_MIN_LENGTH: "2"
+  ENG_LAST_NAME_MAX_LENGTH: "19"
+
+country:
+  callingcode: 
+    "+86": "11"
+    "+1": "10"
+  callingcodes: "+86,+1"    

@@ -1,0 +1,590 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<flow name="checkDuplicateRequestUUIDInExistingApplication_flow" doc:id="be28447a-4bb3-41c1-a090-3eea41530b3b" >
+		<logger level="INFO" doc:name="Logger" doc:id="f380dba6-ee59-41f8-891d-67320ad0e086" message="Check for duplicate request UUID:: #[vars.requestUUID]"/>
+		<until-successful maxRetries="2" doc:name="Until Successful" doc:id="0f7db04d-fc03-43ac-86d9-93166c67a7fb" millisBetweenRetries="5000">
+			<salesforce:query-single doc:name="Get Application having same Request UUID" doc:id="68f798bc-9ed6-4fb7-b738-667f4acdbad5" target="existingAppDetails" config-ref="Salesforce_Config">
+			<reconnect-forever frequency="3000"/>
+				<salesforce:salesforce-query>Select Id, Name, REQUESTUUID__c, Application__r.Name from Additional_Information__c where REQUESTUUID__c = ':requuid'</salesforce:salesforce-query>
+			<salesforce:parameters><![CDATA[#[output application/java
+---
+{
+	"requuid" : vars.RequestUUID
+}]]]></salesforce:parameters>
+		</salesforce:query-single>
+		</until-successful>
+		<validation:is-null doc:name="Check Duplicate UUID in Application" doc:id="1657e867-ac0f-4cbb-a2b0-2ee3e3f9867d" value="#[vars.existingAppDetails.Application__r.Name]" message='#["Application " ++ vars.existingAppDetails.Application__r.Name default "" ++ " already exists with the same Request UUID"]' />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="0b0876af-f32c-4040-a251-984ef149f41a" >
+				<ee:transform doc:name="Set Error Details" doc:id="4a1416cf-d7bb-4b85-b0d4-c8d6fae40448" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="functionalError" ><![CDATA[%dw 2.0
+output application/java
+---
+"Duplicate Request UUID found  " ++ vars.RequestUUID]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<sub-flow name="SalesforceMainFlow" doc:id="0ca1d368-d0cd-46d6-8a47-d65305c64073" >
+		<logger level="INFO" doc:name="Logger" doc:id="aa236a7f-7129-4444-af63-c14515337e11" message="Salesforce Main flow"/>
+		<json-logger:logger doc:name="Create Request" doc:id="a4a70597-4c4d-4496-95d5-334f42c3ba56" message="Create Request" config-ref="JSON_Logger_Config" priority="DEBUG" tracePoint="PRINT">
+					<json-logger:content><![CDATA[#[output application/json ---
+{
+	"Operation" : vars.Operation
+}]]]></json-logger:content>
+			
+				</json-logger:logger>
+		<flow-ref doc:name="checkDuplicateRequestUUIDInExistingApplication_flow" doc:id="a5a9a6df-1b1e-4221-8f40-615dd3c09b6c" name="checkDuplicateRequestUUIDInExistingApplication_flow" />
+		<flow-ref doc:name="salesforceCreateFlow" doc:id="d2630eb5-1e77-48b0-8c84-d4e51e3bbba7" name="salesforceCreateFlow" />
+		<async doc:name="Async" doc:id="7ec75e9b-2781-47eb-9ece-4fd7ddd6668a">
+					<ee:transform doc:name="Transform Message" doc:id="aae2eddb-a818-4b89-858d-c024ae2868e1">
+						<ee:message>
+						</ee:message>
+						<ee:variables>
+							<ee:set-variable variableName="log"><![CDATA[%dw 2.0
+output application/json
+---
+{
+	applicationId: vars.applicationData.id,
+	originalPayload: vars.InputPayload mapObject {
+		($$) : if (($$ as String) != "Documents") $ else (($ default []) map ($ - "DocumentFrontImage" - "DocumentBackImage"))
+	},
+	source: "Original Request - Create"
+}]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<flow-ref doc:name="SalesforceDebug" doc:id="4554faca-ed42-4ac7-804c-39d9f4dbcdcf" name="salesforcedebuglogFlow" />
+				</async>
+		<logger level="INFO" doc:name="Logger" doc:id="61011296-00c7-492d-856f-c6bc249034cc" message="#[vars.sfdcInsertStatus]" />
+		<json-logger:logger doc:name="End of Create Request" doc:id="041e973b-7196-46f1-99a9-d47730565a6b" tracePoint="PRINT" message="After Inserting Records in SFDC" config-ref="JSON_Logger_Config" priority="DEBUG">
+					<json-logger:content><![CDATA[#[output application/json ---
+{
+	"sfdcInsertStatus" : vars.sfdcInsertStatus,
+	"isSfdcInsertSuccess" : vars.isSfdcInsertSuccess
+}]]]></json-logger:content>
+			
+				</json-logger:logger>
+	</sub-flow>
+	<sub-flow name="SalesforceUpdateAttachments" doc:id="3de81339-4b02-4f4a-a691-76cbbbf5d6a3" >
+		<json-logger:logger doc:name="Flow start" doc:id="3c962f19-670c-4643-8663-1f779f80c56e" message="Salesforce Update Attachments start" config-ref="JSON_Logger_Config" tracePoint="BEFORE_FLOW">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+		<try doc:name="Try" doc:id="373a30ec-e9f0-4a44-8e00-a9ff13b3ca46" >
+			<salesforce:query doc:name="Get Document RequestIds" doc:id="5ac3502f-ef3a-486d-adf9-11f25517fd54" target="docRqstIds" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query>SELECT Id  FROM TF4SF__Documentation_Request__c  WHERE TF4SF__Application__c =':id'</salesforce:salesforce-query>
+			<salesforce:parameters><![CDATA[#[output application/java
+---
+{
+	"id" : vars.applicationId.Id
+}]]]></salesforce:parameters>
+		</salesforce:query>
+			<logger level="INFO" doc:name="Logger" doc:id="dd0a15e4-ae3f-4e72-867e-2bff20c77f4a" message="Attachment Ids #[vars.docRqstIds]"/>
+			<ee:transform doc:name="Transform Message" doc:id="c45433e2-a913-48db-b125-ef3f694ba0d3">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+vars.docRqstIds map ($.Id)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			<salesforce:delete-multiple doc:name="Delete multiple" doc:id="0cac6504-fb30-4c39-8616-32e979e45f41" config-ref="Salesforce_Config"/>
+			<logger level="INFO" doc:name="Logger" doc:id="20d2ccec-7469-4dba-9abd-68a76b9751e0" message="#[payload]" />
+			<ee:transform doc:name="Transform Message" doc:id="290ad224-64cf-4b5e-b16e-1a51d8fe3037">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="applicationData"><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: vars.applicationId.Id
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+			<flow-ref doc:name="uploadAttachments" doc:id="d58017f0-b6a0-4e89-bf0a-18fe20365521" name="uploadAttachments" />
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="34278e74-90bc-4689-9210-2af35c6146ed" >
+					<logger level="INFO" doc:name="Logger" doc:id="c09c7c08-6a70-419f-8be3-bd91cd13fbe1" message="Error in update attachments "/>
+					<flow-ref doc:name="generic-exception-Sub_Flow" doc:id="4e61ba09-25d1-4551-8295-fc9c26c88cfe" name="generic-exception-Sub_Flow"/>
+				</on-error-continue>
+			</error-handler>
+		</try>
+		<json-logger:logger doc:name="Flow End" doc:id="c69c6ae0-5ec8-41e7-8c11-8e6d15301fed" message="Salesforce Update Attachments end" config-ref="JSON_Logger_Config" tracePoint="AFTER_FLOW">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+	</sub-flow>
+	<sub-flow name="SalesforceApplicationUpdateFlow" doc:id="9af92ad3-5575-4551-b848-e7039707ea91" >
+		<json-logger:logger doc:name="Logger" doc:id="f3317080-dff8-408f-bf07-8c33baa27b4b" message="Start Update account" config-ref="JSON_Logger_Config" tracePoint="BEFORE_FLOW">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+		<try doc:name="Try" doc:id="f4377f03-d2aa-4e00-9053-072d29d05c5b" >
+			<logger level="INFO" doc:name="Logger" doc:id="ae048507-760a-40d4-a17b-b69e8f78cd13" message="Start Update account"/>
+			<logger level="INFO" doc:name="Logger" doc:id="630e95b7-fea8-4159-a318-f1fc5944980b" message="End Update account"/>
+			<until-successful maxRetries="3" doc:name="Until Successful" doc:id="751b06d4-bdd2-4147-88f2-885f25b9b4f6" millisBetweenRetries="${RETRIES_INTERVALS.SF_CONNECTER_RETRY}">
+				<salesforce:query-single doc:name="Get Application Id" doc:id="77479dd8-75a7-40c0-97f7-780d2f4ab2dc" target="applicationId" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query>SELECT Id FROM TF4SF__Application__c WHERE Name =':appName'</salesforce:salesforce-query>
+			<salesforce:parameters><![CDATA[#[output application/java
+---
+{
+	"appName" : vars.appName
+}]]]></salesforce:parameters>
+		</salesforce:query-single>
+			</until-successful>
+			<ee:transform doc:name="Set Application Variables" doc:id="18fe68fd-9abf-456e-bb0c-1719dfe0e90d">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"id": vars.applicationId.Id,
+	TF4SF__Product__c: if(vars.payloadMap.Accounts[0].AccountType[0 to 2] == "CHK")
+						"Checking"
+					else if (vars.payloadMap.Accounts[0].AccountType[0 to 2] == "SVG")	
+						"Savings"
+					else "",
+	//Commented on 11/23/2018			
+	/*TF4SF__City__c: vars.payloadMap.Accounts[0].CardForeignAddress.City,
+	TF4SF__Country__c: if(vars.payloadMap.Accounts[0].CardForeignAddress.CountryCode == "USA") "United States of America" else "China",
+	TF4SF__State__c: vars.payloadMap.Accounts[0].CardForeignAddress.State,
+	TF4SF__Street_Address_1__c: vars.payloadMap.Accounts[0].CardForeignAddress.StreetAddress1,
+	TF4SF__Street_Address_2__c: vars.payloadMap.Accounts[0].CardForeignAddress.StreetAddress2,
+	TF4SF__Zip_Code__c: vars.payloadMap.Accounts[0].CardForeignAddress.Zip,*/
+	//Commented on 11/23/2018
+	
+	TF4SF__Created_Channel__c: if(vars.payloadMap.Partner.Channel == "Branch") "Branch" else "Online",
+	TF4SF__Current_Channel__c: if(vars.payloadMap.Partner.Channel == "Branch") "Branch" else "Online",
+	TF4SF__Email_Address__c: vars.payloadMap.Customer.EmailAddress,
+	TF4SF__First_Name__c: vars.customerNameEnglish.FirstName[0] default null,
+	TF4SF__IP_Address__c: vars.payloadMap.Partner.ApplicationIp,
+	TF4SF__Last_Name__c: vars.customerNameEnglish.LastName[0] default null,
+	
+	// New paths starts for PrimaryAddress 11/30/2018--> conditions based on IsForeignAddress removed 
+	TF4SF__City__c: vars.primaryAddress[0].City default "",
+	//TF4SF__Country_Code__c: vars.primaryAddress[0].CountryCode default "",
+	TF4SF__Country__c:if(vars.primaryAddress[0].CountryCode == "USA") "United States" else "China",
+	TF4SF__State__c: vars.primaryAddress[0].State default "",
+	TF4SF__Street_Address_1__c: vars.primaryAddress[0].StreetAddress1,
+	TF4SF__Street_Address_2__c: vars.primaryAddress[0].StreetAddress2,
+	Street_Address_3__c: vars.primaryAddress[0].StreetAddress3 default "",
+	TF4SF__Zip_Code__c: vars.primaryAddress[0].Zip default "",
+	// New paths ends for PrimaryAddress 11/30/2018
+	
+	//12/4/2018
+	TF4SF__Country_Code__c:vars.payloadMap.Customer.ContactInformation[0].CountryCode default "",
+	
+	TF4SF__Created_Channel__c: if(vars.payloadMap.Partner.Channel == "Branch") "Branch" else "Online",
+	TF4SF__Current_Channel__c: if(vars.payloadMap.Partner.Channel == "Branch") "Branch" else "Online",
+	TF4SF__Email_Address__c: vars.payloadMap.Customer.EmailAddress,
+	TF4SF__First_Name__c: vars.payloadMap.Customer.Names[0].FirstName,
+	TF4SF__IP_Address__c: vars.payloadMap.Partner.ApplicationIp,
+	TF4SF__Last_Name__c: vars.payloadMap.Customer.Names[0].LastName,
+	
+	// commiting start   11/9/2018	
+	/*TF4SF__Mailing_City__c: vars.payloadMap.Accounts[0].CardForeignAddress.City,
+	TF4SF__Mailing_Country__c: if(vars.payloadMap.Accounts[0].CardForeignAddress.CountryCode == "USA") "United States of America" else "China",
+	TF4SF__Mailing_State__c: vars.payloadMap.Accounts[0].CardForeignAddress.State,
+	TF4SF__Mailing_Street_Address_1__c: vars.payloadMap.Accounts[0].CardForeignAddress.StreetAddress1,
+	TF4SF__Mailing_Street_Address_2__c: vars.payloadMap.Accounts[0].CardForeignAddress.StreetAddress2,
+	TF4SF__Mailing_Zip_Code__c: vars.payloadMap.Accounts[0].CardForeignAddress.Zip,*/	
+	// commiting end   11/9/2018
+	
+	// New paths starts for MailingAddress 11/9/2018 update on 11/30/2018--> conditions based on IsForeignAddress removed 
+	TF4SF__Mailing_City__c: vars.mailingAddress[0].City default "",
+	TF4SF__Mailing_Country__c: vars.mailingAddress[0].CountryCode default "",
+	Mailing_Country_NRA__c: if(vars.mailingAddress[0].CountryCode == "USA") "United States" else "China",
+	TF4SF__Mailing_State__c: vars.mailingAddress[0].State default "",
+	TF4SF__Mailing_Street_Address_1__c: vars.mailingAddress[0].StreetAddress1,
+	TF4SF__Mailing_Street_Address_2__c: vars.mailingAddress[0].StreetAddress2,
+	Mailing_Street_Address_3__c: vars.mailingAddress[0].StreetAddress3,
+	TF4SF__Mailing_Zip_Code__c: vars.mailingAddress[0].Zip default "",
+	// New paths ends for MailingAddress 11/9/2018
+	
+	TF4SF__Marital_Status__c: vars.payloadMap.Customer.MaritalStatus,
+	TF4SF__Middle_Name__c: vars.payloadMap.Customer.Names[0].MiddleInitial,
+	TF4SF__Primary_Phone_Number__c: vars.payloadMap.Customer.ContactInformation[0].Number,
+	TF4SF__Application_Status__c: "Submitted",
+	//Partner_Application_Status__c: vars.payloadMap.Partner.VerificationResults,	
+	TF4SF__Sub_Product__c: vars.payloadMap.Accounts[0].AccountName,
+	TF4SF__Submitted_Channel__c: vars.payloadMap.Partner.Channel,
+	TF4SF__Type_of_Checking__c: vars.payloadMap.Accounts[0].AccountName,
+	TF4SF__Type_of_Savings__c: vars.payloadMap.Accounts[0].AccountName,
+	
+	// TF4SF__Country_Code__c: null,
+	Custom_Picklist9__c: vars.payloadMap.Customer.NonResidentAccountInformation.VisaType default null,
+	Preferred_First_Name__c: vars.payloadMap.Customer.NonResidentAccountInformation.PreferredName default null,
+	//12/4/2018
+	Custom_Text17__c: if(vars.payloadMap.Customer.NonResidentAccountInformation.ForeignTaxNumber != null)
+						vars.payloadMap.Customer.NonResidentAccountInformation.ForeignTaxNumber
+					else if (vars.payloadMap.Customer.TaxNumber != null) 
+						vars.payloadMap.Customer.TaxNumber
+					else null
+
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="application"><![CDATA[%dw 2.0
+output application/json
+---
+{
+	name:vars.appName,
+	id: vars.applicationId.Id
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="22fd5296-7af0-45ec-ae71-d842b1db7d6a" />
+			<salesforce:update-single type="TF4SF__Application__c" doc:name="Update single" doc:id="282775bf-760f-4945-9f6c-c0e00bb4ad82" target="applicationData" config-ref="Salesforce_Config"/>
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="40112ca6-9774-4d6f-9a50-6f6553024a5e" >
+					<logger level="INFO" doc:name="Logger" doc:id="f1594ac4-b527-4df4-b2da-fddc5e47dfab" message="Error In UPdate application "/>
+					<flow-ref doc:name="generic-exception-Sub_Flow" doc:id="899c6a8e-42e1-423a-b395-e83da37a07d9" name="generic-exception-Sub_Flow"/>
+				</on-error-continue>
+			</error-handler>
+		</try>
+		<json-logger:logger doc:name="Logger" doc:id="697523ea-5fae-44c6-8eb2-cdb40cfea341" tracePoint="AFTER_FLOW" message="After Update account flow" config-ref="JSON_Logger_Config">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+	</sub-flow>
+	<sub-flow name="SalesforceUpdateAccAndCISInfo" doc:id="474c398a-3fae-4be7-af52-0af5225a76e5" >
+	<json-logger:logger doc:name="Logger" doc:id="94a2b836-3237-4715-8358-e995582cb155" message="Start Update account after Successful Partner API Call" config-ref="JSON_Logger_Config" tracePoint="BEFORE_FLOW">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{
+	partApiResp:vars.partApiResp
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<try doc:name="Try" doc:id="68ece2da-d261-4bb6-b8c5-1745896205ca" >
+			<ee:transform doc:name="Transform Message" doc:id="c49f7b46-c429-4a7b-9959-e76965b6b085" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="isSourceException" ><![CDATA[%dw 2.0
+output application/json
+---
+if(vars.partApiResp != null and vars.partApiResp.data != null and (not isEmpty(vars.partApiResp.data.ErrorMessageList))) 
+	vars.partApiResp.data.ErrorMessageList filter ($.SourceKYC != null)
+else []]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="53a78310-97d1-44f8-92e9-cf098b4e3d2d" message="the application marked for #[output application/json --- vars.isSourceException]"/>
+			<ee:transform doc:name="Transform Message" doc:id="986a816b-935a-4fd1-89d3-ea831eb22721">
+			<ee:message>
+			</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="updateAccReq" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"id": vars.applicationData.id,
+	TF4SF__External_App_Stage__c: vars.partApiResp..CustomerNumber[0] default null,
+	TF4SF__External_App_Id__c: vars.partApiResp..AccountNumber[0] as String default "",
+	TF4SF__Primary_Product_Status__c: if(vars.isSourceException != []) p('variables.APPLICATION.STATUS.TECHNICALERROR') else vars.partApiResp..ApplicationStatus[0] default null,
+	Application_Case_No__c: vars.partApiResp..CaseNumber[0] default null,
+	Primary_Product_Case_Status__c :  vars.caseApprovedStatus default null
+}]]></ee:set-variable>
+				</ee:variables>
+		</ee:transform>
+			<json-logger:logger doc:name="Before Request" doc:id="c30b6042-c48a-48be-a03c-93a8fb4922fe" config-ref="JSON_Logger_Config" tracePoint="BEFORE_REQUEST" message="Updating application status to salesforce">
+				<json-logger:content ><![CDATA[#[output application/json ---
+{
+ 	updateAccReq: vars.updateAccReq
+}]]]></json-logger:content>
+			</json-logger:logger>
+			<salesforce:update-single type="TF4SF__Application__c" doc:name="Update single" doc:id="7c95d28a-cabf-4f60-bbea-7609d2805154" target="updateAccResp" targetValue="#[output application/json --- payload]" config-ref="Salesforce_Config">
+				<salesforce:record ><![CDATA[#[vars.updateAccReq]]]></salesforce:record>
+			</salesforce:update-single>
+			<ee:transform doc:name="Transform Message" doc:id="8aa397a0-87f9-4176-bb65-04dfdbec8684">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+					<ee:set-variable variableName="updateAccResp" ><![CDATA[%dw 2.0
+output application/json
+---
+vars.updateAccResp]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="06270c0e-ef7d-4607-bf3a-6d3599415133" message="Salesforce status update response: #[vars.updateAccResp]"/>
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="f3f0570d-e80f-48c6-a3dd-186ab1c41efe" >
+					<logger level="INFO" doc:name="Logger" doc:id="bea97304-641e-42c3-930d-badd15ee9fe2" message="Error in updating account info in SFDC "/>
+					<json-logger:logger doc:name="Logger" doc:id="2c18957d-fd3e-4334-b2ee-9db7b8e31b92" message="Error in updating account info in SFDC " config-ref="JSON_Logger_Config" priority="ERROR" tracePoint="EXCEPTION">
+						<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+					</json-logger:logger>
+					<flow-ref doc:name="generic-exception-Sub_Flow" doc:id="7e6622fa-c72e-455c-89e0-966cddcb7ac8" name="generic-exception-Sub_Flow"/>
+				</on-error-continue>
+			</error-handler>
+		</try>
+		<json-logger:logger doc:name="Logger" doc:id="43ea9dcc-fb35-46b4-b2e5-642690544c22" tracePoint="AFTER_FLOW" config-ref="JSON_Logger_Config" message="Update account End">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+	</sub-flow>
+	<sub-flow name="SalesforceUpdateAdditionalInfo" doc:id="62681023-a370-4d22-adce-8955692b7a62" >
+		<salesforce:query-single doc:name="Get Additional Info Object" doc:id="20d18060-b8a8-48b7-994c-44cfccc1ba74" target="additionalInfo" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query >SELECT Id  FROM Additional_Information__c  WHERE Application__c =':id'</salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"id" : vars.applicationId.Id
+}]]]></salesforce:parameters>
+		</salesforce:query-single>
+		<choice doc:name="Additional Info Object Exist?" doc:id="87286e69-dc6a-4d39-9f4b-bf80d8462aff" >
+			<when expression="#[vars.additionalInfo[0] != null]" >
+				<ee:transform doc:name="Transform Message" doc:id="73de51df-c49f-4ce0-aec3-23876cf7410f" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+
+[{
+	id: vars.additionalInfo.Id,
+	// Application__c: vars.applicationData.id,
+	IsITINAppliedFor__c: vars.InputPayload.Customer.Identification.IsTINAppliedFor as String,
+	W8CertificateDate__c: vars.InputPayload.Customer.W8CertificateDate,
+	//New starts Fields 11/5/2018
+	CountryResidentCode__c: vars.payloadMap.Customer.CountryResidentCode,
+	CountryOfBirthCode__c: vars.payloadMap.Customer.CountryOfBirthCode,
+	PrimaryBanking__c: vars.payloadMap.Customer.PrimaryBanking,
+	//New ends Fields 11/5/2018
+	
+	//New starts Fields 11/16/2018
+	EsignDateAccepted__c: vars.payloadMap.Customer.EsignDateAccepted,
+	EsignIsAccepted__c: vars.payloadMap.Customer.EsignIsAccepted,
+	EsignTimeAccepted__c: vars.payloadMap.Customer.EsignTimeAccepted,
+	TermsDateAccepted__c: vars.payloadMap.Customer.TermsDateAccepted,
+	TermsIsAccepted__c: vars.payloadMap.Customer.TermsIsAccepted,
+	TermsTimeAccepted__c: vars.payloadMap.Customer.TermsTimeAccepted,	
+	//New ends Fields 11/16/2018
+	//New starts Fields 03/22/2019
+	EStatementAccepted__c: vars.payloadMap.Customer.EStatementAccepted,
+	EStatementAcceptedDate__c: vars.payloadMap.Customer.EStatementAcceptedDate,
+	EStatementAcceptedTime__c: vars.payloadMap.Customer.EStatementAcceptedTime,
+	//New ends Fields 03/22/2019
+	//New Fields start 11/27/2018
+	// Debit_Card_Failed__c: if (sizeOf(vars.mailingAddress) > 0 and (sizeOf(vars.mailingAddress[0].StreetAddress1 default "") > 30 or sizeOf(vars.mailingAddress[0].StreetAddress2  default "") > 30 or sizeOf(vars.mailingAddress[0].StreetAddress3  default "") > 30)) true
+						 // else if (sizeOf(vars.primaryAddress[0].StreetAddress1  default "") > 30 or sizeOf(vars.primaryAddress[0].StreetAddress2  default "") > 30 or sizeOf(vars.primaryAddress[0].StreetAddress3  default "") > 30)  true
+						 // else false,	
+	
+	//New Field end 11/27/2018
+	//Edited Field end 04/11/2019
+	Debit_Card_Failed__c:  false,		
+	Mothers_Maiden_Name__c: vars.InputPayload.Customer.MothersMaidenName,
+	Gender__c: vars.InputPayload.Customer.Gender,
+	Mail_Code__c: vars.InputPayload.Customer.MailCode,
+	W8CertificateType__c: vars.InputPayload.Customer.W8CertificateType,
+	TaxIdType__c: vars.InputPayload.Customer.TaxIdType,
+	Operation__c: vars.InputPayload.Operation,
+	Card_Holder_Name_1__c: vars.payloadMap.Accounts[0].CardHolderName1,
+	Card_Holder_Name_2__c: vars.payloadMap.Accounts[0].CardHolderName2,
+	REQUESTUUID__c: vars.InputPayload.RequestUUID,
+	PartnerId__c: vars.InputPayload.Partner.PartnerId,
+	Partner_Name__c: vars.InputPayload.Partner.PartnerName,
+	CustomerAccountRelationshipCode__c: vars.InputPayload.Accounts[0].CustomerToAccountRelationship[0].CustomerAccountRelationshipCode,
+	NumberOfStatmentCopies__c: vars.InputPayload.Accounts[0].CustomerToAccountRelationship[0].NumberOfStatementCopies,
+	CustomerAccountAssociationType__c: vars.InputPayload.Accounts[0].CustomerToAccountRelationship[0].CustomerAccountAssociationType,
+	Prinmary_Language__c: vars.InputPayload.Customer.PrimaryLanguage,
+	Partner_Application_Status__c: vars.InputPayload.Partner.VerificationResults,
+	// Chinese Primary address in Chinese character 
+	StreetAddress_1__c: vars.primaryChineseAddress[0].StreetAddress1,
+	StreetAddress_2__c: vars.primaryChineseAddress[0].StreetAddress2,
+	StreetAddress_3__c: vars.primaryChineseAddress[0].StreetAddress3,
+	Country_Code__c: vars.primaryChineseAddress[0].CountryCode,
+	Country__c: vars.primaryChineseAddress[0].Country,
+	City__c: vars.primaryChineseAddress[0].City,
+	State__c: vars.primaryChineseAddress[0].State,
+	Zip__c: vars.primaryChineseAddress[0].Zip,
+	// Chinese Mailing address in Chinese character 
+	Mailing_Street_Address_1__c: vars.mailingChineseAddress[0].StreetAddress1,
+	Mailing_Street_Address_2__c: vars.mailingChineseAddress[0].StreetAddress2,
+	Mailing_Street_Address_3__c: vars.mailingChineseAddress[0].StreetAddress3,
+	Mailing_Country_Code__c: vars.mailingChineseAddress[0].CountryCode,
+	Mailing_Country__c: vars.mailingChineseAddress[0].Country,
+	Mailing_City__c: vars.mailingChineseAddress[0].City,
+	Mailing_State__c: vars.mailingChineseAddress[0].State,
+	Mailing_Zip_Code__c: vars.mailingChineseAddress[0].Zip,
+	Campaign__c: vars.InputPayload.Customer.CampaignId default null,
+	First_Name__c: vars.customerNameChinese.FirstName[0] default null,
+	Last_Name__c: vars.customerNameChinese.LastName[0] default null
+}]
+
+
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<salesforce:update doc:name="Update Additional Info" doc:id="ac87cc89-8b09-4479-a9c2-e4983f5f071a" type="Additional_Information__c" config-ref="Salesforce_Config"/>
+			</when>
+			<otherwise >
+				<json-logger:logger doc:name="Create Additional Info Object" doc:id="72b0b893-68fe-4852-81ca-8528df121805" message="Create Identity Information" config-ref="JSON_Logger_Config">
+					<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+				</json-logger:logger>
+				<ee:transform doc:name="Transform Message" doc:id="aa9c8535-d625-40e0-8665-5acd1f3a367e">
+					<ee:message>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="applicationData" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	id: vars.payloadMap.ApplicationId
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<flow-ref doc:name="SalesforceCreateAdditionalInformationFlow" doc:id="a5d7269b-c69e-4a62-995e-c3751f452b9b" name="SalesforceCreateAdditionalInformationFlow"/>
+			</otherwise>
+		</choice>
+	</sub-flow>
+	<sub-flow name="SalesforceUpdateIdentityInfo" doc:id="cb309dcc-051c-47fa-981e-48ad80417970" >
+		<salesforce:query-single doc:name="Query single" doc:id="4125151b-e923-4f47-b45d-7a611e70d14b" target="identificationId" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query >SELECT Id  FROM TF4SF__Identity_Information__c  WHERE TF4SF__Application__c =':id'</salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"id" : vars.applicationId.Id
+}]]]></salesforce:parameters>
+		</salesforce:query-single>
+		<choice doc:name="Choice" doc:id="e90c46be-188d-4b42-b189-a4685868ba65" >
+			<when expression="#[vars.identificationId[0] != null]" >
+				<ee:transform doc:name="Transform Message" doc:id="45883fda-9a3a-409d-be41-f676e0f1b642" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	id: vars.identificationId.Id,
+	// TF4SF__Application__c : vars.applicationData.id,
+	TF4SF__Citizenship__c: vars.payloadMap.Customer.CitizenshipCode,	
+	TF4SF__Country_of_Citizenship__c: vars.payloadMap.Customer.CitizenshipCode,
+	TF4SF__Custom_Picklist6__c: vars.payloadMap.Customer.CountryofDualCitizenship,
+	//12/7/2018 start 
+	TF4SF__Custom_Text17__c: vars.payloadMap.Customer.NonResidentAccountInformation.ForeignTaxNumber default null,
+	TF4SF__Date_of_Birth__c: vars.payloadMap.Customer.DateOfBirth as Date {format: "yyyy-MM-dd"}  as String {format: "MM/dd/yyyy"},
+	//12/7/2018 end
+	TF4SF__ID_Type__c: vars.payloadMap.Customer.PrimaryID,
+	TF4SF__SSN_Prime__c: vars.payloadMap.Customer.TaxNumber default null,
+	SSN__c: vars.payloadMap.Customer.TaxNumber default null,
+	Place_Of_Birth__c: vars.payloadMap.Customer.BirthPlace,
+	Custom_Picklist12__c: vars.payloadMap.Customer.IsPoliticallyExposedPerson,
+	Custom_Picklist13__c: if(vars.payloadMap.ApplicantType == "NonNRA") "Yes" else "No",
+	MID__c: vars.payloadMap.MID default null,
+	//04-10-2019 
+	Device_Id__c : vars.payloadMap.DeviceId default null ,
+	Referral_Code__c : vars.payloadMap.ReferralCode default null,
+	US_Resident_For_TaxPurpose__c: if(null != vars.payloadMap.IsUSTaxResident and vars.payloadMap.IsUSTaxResident == true)
+										"Yes"
+									else if(null != vars.payloadMap.IsUSTaxResident and vars.payloadMap.IsUSTaxResident == false)
+										"No"
+									else null
+}] ]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<salesforce:update type="TF4SF__Identity_Information__c" doc:name="Update" doc:id="0031887f-c71c-44a5-bab0-010048a2c448" config-ref="Salesforce_Config"/>
+			</when>
+			<otherwise >
+				<json-logger:logger doc:name="Create Identity Information" doc:id="74903de5-c4d8-4a5a-8be1-f5d7f0538e0b" message="Create Identity Information" config-ref="JSON_Logger_Config">
+					<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+				</json-logger:logger>
+				<logger level="INFO" doc:name="Logger" doc:id="6b1c9d00-2517-4269-9e64-8623315ff92a" message="Create Identity Information" />
+				<ee:transform doc:name="Transform Message" doc:id="ff8f27b9-8ee6-47d1-a350-1c87f55aa1b1" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="applicationData" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	id: vars.payloadMap.ApplicationId
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<flow-ref doc:name="updateIdentificationInfoFlow" doc:id="e09289fe-db8a-4550-9c7e-826793c0ca33" name="updateIdentificationInfoFlow"/>
+			</otherwise>
+		</choice>
+	</sub-flow>
+	<sub-flow name="SalesforceEmploymentUpdateFlow" doc:id="7ee8244e-2557-4ae2-8d34-4881d456a3ff" >
+		<json-logger:logger doc:name="Update Employment start" doc:id="d76cce16-4589-4d77-af40-0f611a55ab14" message="Update Employment start" config-ref="JSON_Logger_Config" tracePoint="BEFORE_FLOW">
+			<json-logger:content><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+		<json-logger:logger doc:name="Employment Id" doc:id="56491f2c-8cc7-4462-893c-dd982a0498a8" config-ref="JSON_Logger_Config" priority="DEBUG" tracePoint="PRINT" message="Employment Id">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{
+    employmentid: vars.employmentId[0]
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<salesforce:query-single doc:name="Query single" doc:id="f2313982-5c00-40dd-bea1-1ac1309f250c" target="employmentId" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query >SELECT Id  FROM TF4SF__Employment_Information__c  WHERE TF4SF__Application__c =':id'</salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"id" : vars.applicationId.Id
+}]]]></salesforce:parameters>
+		</salesforce:query-single>
+		<choice doc:name="Choice" doc:id="201e3be2-cdb0-40c5-8a14-255bb09f9e38" >
+			<when expression="#[vars.employmentId[0] != null]" >
+				<ee:transform doc:name="Transform Message" doc:id="4fa8544d-76d6-4fb5-a7c2-4542a19a253e">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	id: vars.employmentId.Id,
+	TF4SF__Employer__c: vars.payloadMap.Customer.EmploymentOrSchool,
+	//TF4SF__Application__c : vars.payloadMap.ApplicationId,
+	TF4SF__Occupation__c: vars.payloadMap.Customer.Occupation,
+	PercentShareHolder__c:vars.payloadMap.Customer.TenPercentShareHolder,
+	Position__c: vars.payloadMap.Customer.Position,
+	TF4SF__Years_Emp__c: vars.payloadMap.Customer.YearEmployed,
+	Annual_Income_Range__c: vars.payloadMap.Customer.AnnualIncome,
+	TotalNetWorth__c: vars.payloadMap.Customer.TotalNetWorth,
+	Conduct_International_Transaction_NRA__c: vars.payloadMap.Customer.NonResidentAccountInformation.IntendOutgoingWires as String,
+	Excepted_Transactional_NRA__c: vars.payloadMap.Customer.NonResidentAccountInformation.IncomingWiresLimit,
+	International_Transactions_NRA__c: vars.payloadMap.Customer.NonResidentAccountInformation.IntendInternationalWires as String,
+	Primary_Income_Source_NRA__c: vars.payloadMap.Customer.NonResidentAccountInformation.SourceOfWealth,
+	Receive_International_Amount__c: vars.payloadMap.Customer.NonResidentAccountInformation.OutgoingWiresLimit,
+	Receive_International_Transactions__c: vars.payloadMap.Customer.NonResidentAccountInformation.IntendIncomingWires as String,
+	Employment_Date__c: vars.payloadMap.Customer.EmploymentDate,
+	Primary_Account_Purpose_NRA__c: vars.payloadMap.Customer.NonResidentAccountInformation.PurposeOfAccount
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<salesforce:update type="TF4SF__Employment_Information__c" doc:name="Update" doc:id="04be83ee-7850-4d1b-9dcf-91956466554f" config-ref="Salesforce_Config"/>
+				<choice doc:name="Choice" doc:id="54a4ef91-a1b3-48b4-90ac-3fcbbfee1cff" >
+					<when expression="#[payload.success[0] == false]" >
+						<json-logger:logger doc:name="Logger" doc:id="1c3cc0a6-757f-4c0d-baf8-e05dd877b757" message="Error: " config-ref="JSON_Logger_Config" priority="DEBUG" tracePoint="PRINT">
+							<json-logger:content ><![CDATA[#[output application/json ---
+{
+ 	payload: payload,
+    error: payload[0].errors[0].message
+}]]]></json-logger:content>
+						</json-logger:logger>
+						<logger level="INFO" doc:name="Logger" doc:id="4265aeb7-0cf0-4b67-93a3-29e6d79c1fef" message="Error : #[payload]"/>
+					</when>
+				</choice>
+			</when>
+			<otherwise>
+				<logger level="INFO" doc:name="Logger" doc:id="605421ab-df49-42c8-a665-5f1a58321aeb" message="Create Employment"/>
+			</otherwise>
+		</choice>
+		<json-logger:logger doc:name="Update Employment start" doc:id="3142410a-d9e2-4641-936c-38e6e0434e7b" message="Update Employment end" config-ref="JSON_Logger_Config" tracePoint="AFTER_FLOW">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+	</sub-flow>
+</mule>

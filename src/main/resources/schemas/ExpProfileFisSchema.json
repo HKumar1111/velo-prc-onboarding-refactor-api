@@ -1,0 +1,44 @@
+ {
+   "definitions": {},
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "$id": "http://example.com/root.json",
+   "type": "object",
+   "title": "The Root Schema",
+   "required": [
+     "correlationId",
+     "initiator",
+     "cis"
+   ],
+   "properties": {
+     "CorrelationId": {
+       "$id": "#/properties/correlationId",
+       "type": "string",
+       "title": "The Correlationid Schema",
+       "default": "",
+       "examples": [
+         "b34250bf-7a57-4216-87f5-42cf8bb23d9"
+       ],
+       "pattern": "^(.*)$"
+     },
+     "Initiator": {
+       "$id": "#/properties/initiator",
+       "type": "string",
+       "enum": ["Salesforce", "Msd"],
+       "default": "",
+       "examples": [
+         ["Salesforce","MSD"]
+       ],
+       "pattern": "^(.*)$"
+     },
+     "Cis": {
+       "$id": "#/properties/cis",
+       "type": "string",
+       "title": "The Cis Schema",
+       "default": "",
+       "examples": [
+         "11111"
+       ],
+       "pattern": "^(.*)$"
+     }
+   }
+ }

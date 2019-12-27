@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<json-logger:config name="JSON_Logger_Config" doc:name="JSON Logger Config" doc:id="99520ec7-3937-40e1-93b6-cde9a13e18eb" />
+	<http:request-config name="Partner_Request_configuration" doc:name="HTTP Request configuration" doc:id="41417b22-0d75-4f5e-ad01-098708d4d1c2" >
+		<http:request-connection protocol="HTTPS" host="${bbaeEndPoint.host}" />
+	</http:request-config>
+	<http:request-config name="Webull_Http_Request_Config" doc:name="HTTP Request configuration" doc:id="45958d68-efbd-4319-a7cb-a9f382ad97bc" >
+		<http:request-connection protocol="HTTPS" host="${webullEndPoint.host}" />
+	</http:request-config>
+	<http:request-config name="Process_API_Http_Request_Config" doc:name="HTTP Request configuration" doc:id="ba2cb6ff-ed1e-45c6-9217-3459c30214d9" >
+		<http:request-connection protocol="HTTPS" host="${http.host}" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration_SF" doc:name="HTTP Request configuration" doc:id="ee39d98f-d859-4b5f-bb43-51cf9233063e" >
+		<http:request-connection protocol="HTTPS" host="${oauth.host}" />
+	</http:request-config>
+	<validation:config name="Validation_Config" doc:name="Validation Config" doc:id="3bf000ac-4803-4138-8242-bc678eb90101" />
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="f4a45d7e-7d8c-4a3c-a68c-d4341add89ff" >
+		<salesforce:basic-connection username="${salesforce.username}" password="${salesforce.password}" securityToken="${salesforce.token}" url="${salesforce.url}" />
+	</salesforce:sfdc-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="3e0e0b06-6b4b-4ed3-aea6-58795a122238" file="env-${env}.yaml" />
+	<global-property doc:name="Global Property" doc:id="cc449529-5e98-4e05-b6f4-d76ccc21a75c" name="env" value="dev" />
+	<global-property doc:name="Global Property" doc:id="a94853d1-3fb7-4682-baf7-49859a70e717" name="mule.env" value="local" />
+	<sub-flow name="generic-exception-Sub_Flow" doc:id="97564efc-b810-41eb-bf09-ea1bb29063fa" >
+		<logger level="INFO" doc:name="Logger"
+			doc:id="4fcc3992-c5a0-44ba-a207-2074c79e9c23" message="Exception found Request UUID #[correlationId] Flow Name #[flow.name]" />
+		<json-logger:logger doc:name="Logger" doc:id="54a554e5-6ff5-4679-b773-abafe1610822" priority="ERROR" message="Error in #[flow.name]" config-ref="JSON_Logger_Config" tracePoint="EXCEPTION">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{
+ 	ErrorPayload: payload
+
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<ee:transform doc:name="Update API Errors List" doc:id="4cb58a54-89c2-4411-96a1-bf3676ab7faf">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="errorList" ><![CDATA[%dw 2.0
+output application/json
+---
+if ((error.errorType.namespace ++ ":" ++ error.errorType.identifier) != "APP:DOWNSTREAM_ERRORS")
+	(vars.errorList default []) + { "errorLst" : error.description }
+else
+	(vars.errorList default []) ++ vars.caseUpdateResponse.data.ErrorMessageList default []]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</sub-flow>
+	
+</mule>

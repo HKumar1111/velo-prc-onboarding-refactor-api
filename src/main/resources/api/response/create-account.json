@@ -1,0 +1,12 @@
+{
+    "Message": "success",
+    "ResponseCode": 200,
+    "ApplicationStatus": "Approved",
+    "CaseNumber": "CAS-03154-X5F6J8",
+    "CISNumber": "abeodeisnsd639dfkf",
+    "AccountNumber": "a12997eisnsd639dfkf",
+    "Reasons": {
+        "ReasonCode": 200,
+        "ReasonDescription": "Case Created"
+    }
+}

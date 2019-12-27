@@ -1,0 +1,1639 @@
+{
+	"definitions": {
+		
+	},
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "http://example.com/root.json",
+	"type": "object",
+	"title": "The Root Schema",
+	"required": [
+		"RequestUUID",
+		"ApplicantType",
+		"Partner",
+		"Operation",
+		"Accounts",
+		"Customer",
+		"Documents"
+	],
+	"properties": {
+		"RequestUUID": {
+			"$id": "#/properties/RequestUUID",
+			"type": "string",
+			"title": "The Requestuuid Schema",
+			"default": "",
+			"examples": [
+				"35650bbd-4947-45c4-9113-76a5ce901d5a"
+			],
+			"pattern": "^(.*)$"
+		},
+		"ApplicantType": {
+			"$id": "#/properties/ApplicantType",
+			"type": "string",
+			"enum": [
+				"NRA-CHN",
+				"NonNRA"
+			],
+			"title": "The Applicanttype Schema",
+			"default": "",
+			"examples": [
+				"NRA-CHN"
+			],
+			"pattern": "^(.*)$"
+		},
+		"Partner": {
+			"$id": "#/properties/Partner",
+			"type": "object",
+			"title": "The Partner Schema",
+			"required": [
+				"Channel",
+				"PartnerId",
+				"PartnerName"
+			],
+			"properties": {
+				"ApplicationIp": {
+					"$id": "#/properties/Partner/properties/ApplicationIp",
+					"type": "string",
+					"title": "The Applicationip Schema",
+					"examples": [
+						"127.222.344.233"
+					],
+					"pattern": "^(.*)$"
+				},
+				"Channel": {
+					"$id": "#/properties/Partner/properties/Channel",
+					"type": "string",
+					"title": "The Channel Schema",
+					"enum": [
+						"Web",
+						"Mobile",
+						"Branch"
+					],
+					"examples": [
+						"Web"
+					],
+					"pattern": "^(.*)$"
+				},
+				"PartnerId": {
+					"$id": "#/properties/Partner/properties/PartnerId",
+					"type": "string",
+					"title": "The Partnerid Schema",
+					"default": "",
+					"examples": [
+						"31000112989075"
+					],
+					"pattern": "^(.*)$"
+				},
+				"VerificationResults": {
+					"$id": "#/properties/Partner/properties/VerificationResults",
+					"type": "string",
+					"title": "The Verificationresults Schema",
+					"enum": [
+						"Approved",
+						"Declined",
+						"Fraud",
+						"Pending"
+					],
+					"examples": [
+						"Approved"
+					],
+					"pattern": "^(.*)$"
+				},
+				"PartnerName": {
+					"$id": "#/properties/Partner/properties/PartnerName",
+					"type": "string",
+					"title": "The Partnername Schema",
+					"default": "",
+					"examples": [
+						"Name of the Partner"
+					],
+					"pattern": "^(.*)$"
+				}
+			}
+		},
+		"Operation": {
+			"$id": "#/properties/Operation",
+			"type": "string",
+			"title": "The Operation Schema",
+			"enum": [
+				"Create",
+				"Update"
+			],
+			"pattern": "^(.*)$"
+		},
+		"Accounts": {
+			"$id": "#/properties/Accounts",
+			"type": "array",
+			"title": "The Accounts Schema",
+			"items": {
+				"$id": "#/properties/Accounts/items",
+				"type": "object",
+				"title": "The Items Schema",
+				"required": [
+					"AccountType",
+					"AccountName",
+					"CustomerToAccountRelationship"
+				],
+				"properties": {
+					"AccountType": {
+						"$id": "#/properties/Accounts/items/properties/AccountType",
+						"type": "string",
+						"title": "The Accounttype Schema",
+						"enum": [
+							"CHK_I_PERS_PREMIER", 
+							"CHK_I_VELO" 
+						],
+						"examples": [
+							"CHK_I_VELO"
+						],
+						"pattern": "^(.*)$"
+					},
+					"AccountName": {
+						"$id": "#/properties/Accounts/items/properties/AccountName",
+						"type": "string",
+						"title": "The Accountname Schema",
+						"enum": [
+							"Checking - US Checking",
+							"Saving - US Saving"
+						],
+						"examples": [
+							"Checking - US Checking"
+						],
+						"pattern": "^(.*)$"
+					},
+					"CardHolderName1": {
+						"$id": "#/properties/Accounts/items/properties/CardHolderName1",
+						"type": "string",
+						"title": "The Cardholdername1 Schema",
+						"default": "",
+						"examples": [
+							""
+						],
+						"pattern": "^(.*)$"
+					},
+					"CardHolderName2": {
+						"$id": "#/properties/Accounts/items/properties/CardHolderName2",
+						"type": "string",
+						"title": "The Cardholdername2 Schema",
+						"default": "",
+						"examples": [
+							""
+						],
+						"pattern": "^(.*)$"
+					},
+					"CustomerToAccountRelationship": {
+						"$id": "#/properties/Accounts/items/properties/CustomerToAccountRelationship",
+						"type": "array",
+						"title": "The Customertoaccountrelationship Schema",
+						"items": {
+							"$id": "#/properties/Accounts/items/properties/CustomerToAccountRelationship/items",
+							"type": "object",
+							"title": "The Items Schema",
+							"required": [
+								"CustomerAccountRelationshipCode",
+								"CustomerAccountAssociationType" 
+							],
+							"properties": {
+								"CustomerAccountRelationshipCode": {
+									"$id": "#/properties/Accounts/items/properties/CustomerToAccountRelationship/items/properties/CustomerAccountRelationshipCode",
+									"type": "string",
+									"title": "The Customeraccountrelationshipcode Schema",
+									"enum": [
+										"Individual",
+										"Joint Account"
+									],
+									"examples": [
+										"000"
+									],
+									"pattern": "^(.*)$"
+								},
+								"CustomerAccountAssociationType": {
+									"$id": "#/properties/Accounts/items/properties/CustomerToAccountRelationship/items/properties/CustomerAccountAssociationType",
+									"type": "string",
+									"title": "The Customeraccountassociationtype Schema",
+									"enum": [
+										"Primary",
+										"Secondary"
+									],
+									"examples": [
+										"Primary"
+									],
+									"pattern": "^(.*)$"
+								},
+								"NumberOfStatementCopies": {
+									"$id": "#/properties/Accounts/items/properties/CustomerToAccountRelationship/items/properties/NumberOfStatementCopies",
+									"type": "integer",
+									"title": "The Numberofstatementcopies Schema",
+									"default": 0,
+									"examples": [
+										1
+									]
+								}
+							}
+						}
+					},
+					"CardForeignAddress": {
+						"$id": "#/properties/Accounts/items/properties/CardForeignAddress",
+						"type": "object",
+						"title": "The Cardforeignaddress Schema",
+						"required": [
+							"StreetAddress1",
+							"City",
+							"State",
+							"Zip",
+							"CountryCode"
+						],
+						"properties": {
+							"StreetAddress1": {
+								"$id": "#/properties/Accounts/items/properties/CardForeignAddress/properties/StreetAddress1",
+								"type": "string",
+								"title": "The Streetaddress1 Schema",
+								"default": "",
+								"examples": [
+									"5398 41WK VW DSW 6D"
+								],
+								"pattern": "^(.*)$"
+							},
+							"StreetAddress2": {
+								"$id": "#/properties/Accounts/items/properties/CardForeignAddress/properties/StreetAddress2",
+								"type": "string",
+								"title": "The Streetaddress2 Schema",
+								"default": "",
+								"examples": [
+									""
+								],
+								"pattern": "^(.*)$"
+							},
+							"City": {
+								"$id": "#/properties/Accounts/items/properties/CardForeignAddress/properties/City",
+								"type": "string",
+								"title": "The City Schema",
+								"default": "",
+								"examples": [
+									"ASTORIA"
+								],
+								"pattern": "^(.*)$"
+							},
+							"State": {
+								"$id": "#/properties/Accounts/items/properties/CardForeignAddress/properties/State",
+								"type": "string",
+								"title": "The State Schema",
+								"default": "",
+								"examples": [
+									"NY"
+								],
+								"pattern": "^(.*)$"
+							},
+							"Zip": {
+								"$id": "#/properties/Accounts/items/properties/CardForeignAddress/properties/Zip",
+								"type": "string",
+								"title": "The Zip Schema",
+								"default": "",
+								"examples": [
+									"11105"
+								],
+								"pattern": "^(.*)$"
+							},
+							"CountryCode": {
+								"$id": "#/properties/Accounts/items/properties/CardForeignAddress/properties/CountryCode",
+								"type": "string",
+								"title": "The Countrycode Schema",
+								"default": "",
+								"examples": [
+									"US"
+								],
+								"pattern": "^(.*)$"
+							}
+						}
+					}
+				}
+			}
+		},
+		"Customer": {
+			"$id": "#/properties/Customer",
+			"type": "object",
+			"title": "The Customer Schema",
+			"required": [
+				"Names",
+				"DateOfBirth",
+				"Addresses",
+				"ContactInformation",
+				"CitizenshipCode",
+				"CampaignId",
+				"EmailAddress",
+				"W8CertificateDate",
+				"IsPoliticallyExposedPerson",
+				"NonResidentAccountInformation",
+				"TenPercentShareHolder", 
+				"Position",
+				"YearEmployed",
+				"AnnualIncome",
+				"TotalNetWorth"
+			],
+			"properties": {
+				"Names": {
+					"$id": "#/properties/Customer/properties/Names",
+					"type": "array",
+					"title": "The Names Schema",
+					"items": {
+						"$id": "#/properties/Customer/properties/Names/items",
+						"type": "object",
+						"title": "The Items Schema",
+						"required": [
+							"Type",
+							"FirstName",
+							"LastName"
+						],
+						"properties": {
+							"Type": {
+								"$id": "#/properties/Customer/properties/Names/items/properties/Type",
+								"type": "string",
+								"title": "The Type Schema",
+								"enum": [
+									"English",
+									"Chinese",
+									"Other"
+								],
+								"examples": [
+									"English"
+								],
+								"pattern": "^(.*)$"
+							},
+							"FirstName": {
+								"$id": "#/properties/Customer/properties/Names/items/properties/FirstName",
+								"type": "string",
+								"title": "The Firstname Schema",
+								"minLength": 2,
+								"maxLength": 20,
+								"examples": [
+									"FLORENCE"
+								],
+								"pattern": "^(.*)$"
+							},
+							"LastName": {
+								"$id": "#/properties/Customer/properties/Names/items/properties/LastName",
+								"type": "string",
+								"title": "The Lastname Schema",
+								"minLength": 1,
+								"maxLength": 19,
+								"examples": [
+									"BIEGUN"
+								],
+								"pattern": "^(.*)$"
+							},
+							"MiddleInitial": {
+								"$id": "#/properties/Customer/properties/Names/items/properties/MiddleInitial",
+								"type": "string",
+								"title": "The Middleinitial Schema",
+								"default": "",
+								"examples": [
+									""
+								],
+								"pattern": "^(.*)$"
+							},
+							"Title": {
+								"$id": "#/properties/Customer/properties/Names/items/properties/Title",
+								"type": "string",
+								"title": "The Title Schema",
+								"default": "",
+								"examples": [
+									""
+								],
+								"pattern": "^(.*)$"
+							}
+						}
+					}
+				},
+				"DateOfBirth": {
+					"$id": "#/properties/Customer/properties/DateOfBirth",
+					"type": "string",
+					"title": "The Dateofbirth Schema",
+					"default": "",
+					"examples": [
+						"1951-02-27"
+					],
+					"pattern": "^(.*)$"
+				},
+				"ReferralCode": {
+					"$id": "#/properties/Customer/properties/ReferralCode",
+					"type": "string",
+					"title": "The ReferralCode Schema",
+					"default": "",
+					"examples": [
+						""
+					],
+					"pattern": "^(.*)$"
+				},
+				"DeviceId": {
+					"$id": "#/properties/Customer/properties/DeviceId",
+					"type": "string",
+					"title": "The DeviceId Schema",
+					"default": "",
+					"examples": [
+						""
+					],
+					"pattern": "^(.*)$"
+				},
+				"IsUSTaxResident": {
+					"$id": "#/properties/Customer/properties/IsUSTaxResident",
+					"type": "boolean",
+					"title": "The USTaxResidencyStatus Schema",
+					"default": false,
+					"examples": [
+									true
+								]
+				},
+				"Addresses": {
+					"$id": "#/properties/Customer/properties/Addresses",
+					"type": "array",
+					"title": "The Addresses Schema",
+					"items": {
+						"$id": "#/properties/Customer/properties/Addresses/items",
+						"type": "object",
+						"title": "The Items Schema",
+						"required": [
+							"Type",
+							"IsForeignAddress",
+							"StreetAddress1",
+							"CountryCode",
+							"Country"
+						],
+						"properties": {
+							"Type": {
+								"$id": "#/properties/Customer/properties/Addresses/items/properties/Type",
+								"type": "string",
+								"title": "The Type Schema",
+								"enum": [
+									"MailingAddress",
+									"PrimaryAddress",
+									"ChinesePrimaryAddress",
+									"ChineseMailingAddress",
+									"MailingChineseAddress",
+									"PrimaryChineseAddress",
+									"Other"
+								],
+								"examples": [
+									"MailingAddress"
+								],
+								"pattern": "^(.*)$"
+							},
+							"IsForeignAddress": {
+								"$id": "#/properties/Customer/properties/Addresses/items/properties/IsForeignAddress",
+								"type": "boolean",
+								"title": "IsForeignAddress",
+								"default": false,
+								"examples": [
+									true
+								]
+							},
+							"StreetAddress1": {
+								"$id": "#/properties/Customer/properties/Addresses/items/properties/StreetAddress1",
+								"type": "string",
+								"title": "The Streetaddress1 Schema",
+								"minLength": 1,
+								"examples": [
+									"1100 Market St"
+								],
+								"pattern": "^(.*)$"
+							},
+							"StreetAddress2": {
+								"$id": "#/properties/Customer/properties/Addresses/items/properties/StreetAddress2",
+								"type": "string",
+								"title": "The Streetaddress2 Schema",
+								"default": "",
+								"examples": [
+									"null"
+								],
+								"pattern": "^(.*)$"
+							},
+							"StreetAddress3": {
+								"$id": "#/properties/Customer/properties/Addresses/items/properties/StreetAddress3",
+								"type": "string",
+								"title": "The Streetaddress3 Schema",
+								"default": "",
+								"examples": [
+									"null"
+								],
+								"pattern": "^(.*)$"
+							},
+							"City": {
+								"$id": "#/properties/Customer/properties/Addresses/items/properties/City",
+								"type": "string",
+								"title": "The City Schema",
+								"default": "",
+								"examples": [
+									"San Francisco"
+								],
+								"pattern": "^(.*)$"
+							},
+							"State": {
+								"$id": "#/properties/Customer/properties/Addresses/items/properties/State",
+								"type": "string",
+								"title": "The State Schema",
+								"default": "",
+								"examples": [
+									"CA"
+								],
+								"pattern": "^(.*)$"
+							},
+							"Zip": {
+								"$id": "#/properties/Customer/properties/Addresses/items/properties/Zip",
+								"type": "string",
+								"title": "The Zip Schema",
+								"default": "",
+								"examples": [
+									"94102-3804"
+								],
+								"pattern": "^(.*)$"
+							},
+							"CountryCode": {
+								"$id": "#/properties/Customer/properties/Addresses/items/properties/CountryCode",
+								"type": "string",
+								"title": "The Countrycode Schema",
+								"enum": [
+									"USA",
+									"CHN"
+								],
+								"examples": [
+									"US"
+								],
+								"pattern": "^(.*)$"
+							}
+						}
+					}
+				},
+				"ContactInformation": {
+					"$id": "#/properties/Customer/properties/ContactInformation",
+					"type": "array",
+					"title": "The Contactinformation Schema",
+					"items": {
+						"$id": "#/properties/Customer/properties/ContactInformation/items",
+						"type": "object",
+						"title": "The Items Schema",
+						"required": [
+							"Type",
+							"CountryCode",
+							"Number"
+						],
+						"properties": {
+							"Type": {
+								"$id": "#/properties/Customer/properties/ContactInformation/items/properties/Type",
+								"type": "string",
+								"title": "The Type Schema",
+								"enum": [
+									"Primary",
+									"Mobile",
+									"Secondary",
+									"Fax"
+								],
+								"examples": [
+									"Primary"
+								],
+								"pattern": "^(.*)$"
+							},
+							"CountryCode": {
+								"$id": "#/properties/Customer/properties/ContactInformation/items/properties/CountryCode",
+								"type": "string",
+								"title": "The Type Schema",
+								"enum": [
+									"+86"
+								],
+								"examples": [
+									"+86"
+								]
+							},
+							"Number": {
+								"$id": "#/properties/Customer/properties/ContactInformation/items/properties/Number",
+								"type": "string",
+								"title": "The Number Schema",
+								"examples": [
+									"1085551212"
+								],
+								"pattern": "^[0-9]{11}$"
+							}
+						}
+					}
+				},
+				"TaxNumber": {
+					"$id": "#/properties/Customer/properties/TaxNumber",
+					"type": "string",
+					"title": "The Taxnumber Schema",
+					"minLenth": 9,
+					"maxLength": 9,
+					"examples": [
+						""
+					],
+					"pattern": "^(.*)$"
+				},
+				"TaxIdType": {
+					"$id": "#/properties/Customer/properties/TaxIdType",
+					"type": "string",
+					"title": "The Taxidtype Schema",
+					"enum": [
+						"NoNumber",
+						"SocialSecurityNumber",
+						"FederalTaxNumber",
+						"IndividualTaxpayerIdentificationNumber"
+					],
+					"examples": [
+						""
+					],
+					"pattern": "^(.*)$"
+				},
+				"BirthPlace": {
+					"$id": "#/properties/Customer/properties/BirthPlace",
+					"type": "string",
+					"title": "The Birthplace Schema",
+					"default": "",
+					"examples": [
+						""
+					],
+					"pattern": "^(.*)$"
+				},
+				"CitizenshipCode": {
+					"$id": "#/properties/Customer/properties/CitizenshipCode",
+					"type": "string",
+					"title": "The Citizenshipcode Schema",
+					"enum": [
+						"USA",
+						"CHN"
+					],
+					"examples": [
+						"CHN"
+					],
+					"pattern": "^(.*)$"
+				},
+				"CampaignId": {
+					"$id": "#/properties/Customer/properties/CampaignId",
+					"type": "string",
+					"title": "The CampaignId Schema",
+					"enum": [
+						"B",
+						"I",
+						"W",
+						"F",
+						"T",
+						"D"
+					],
+					"examples": [
+						"B",
+						"I",
+						"W",
+						"F",
+						"T",
+						"D"
+					],
+					"pattern": "^(.*)$"
+				},
+				"W8CertificateType": {
+					"$id": "#/properties/Customer/properties/W8CertificateType",
+					"type": "string",
+					"title": "The W8certificatetype Schema",
+					"enum": [
+						"Blank",
+						"W8BenNoCert",
+						"W8BenCert",
+						"W8BenENoCert",
+						"W8BenECert",
+						"W8ECINoCert",
+						"W8ExpNoCert",
+						"W8ImyNoCert",
+						"NotForeignRes",
+						"ForeignRes"
+					],
+					"examples": [
+						"W8BenNoCert"
+					],
+					"pattern": "^(.*)$"
+				},
+				"PrimaryID": {
+					"$id": "#/properties/Customer/properties/PrimaryID",
+					"type": "string",
+					"title": "The Primaryid Schema",
+					"enum": [
+						"Passport",
+						"Driver License"
+					],
+					"examples": [
+						"Passport"
+					],
+					"pattern": "^(.*)$"
+				},
+				"MailCode": {
+					"$id": "#/properties/Customer/properties/MailCode",
+					"type": "string",
+					"title": "The Mailcode Schema",
+					"enum": [
+						"NoSpecialAction",
+						"CallForStatement",
+						"SpecialHandling",
+						"NoAdvertising",
+						"ForeignAddress",
+						"BadAddress",
+						"SendNothing"
+					],
+					"examples": [
+						"CallForStatement"
+					],
+					"pattern": "^(.*)$"
+				},
+				"PrimaryLanguage": {
+					"$id": "#/properties/Customer/properties/PrimaryLanguage",
+					"type": "string",
+					"title": "The Primarylanguage Schema",
+					"enum": [
+						"Chinese",
+						"English",
+						"Spanish",
+						"Other"
+					],
+					"examples": [
+						"Chinese"
+					],
+					"pattern": "^(.*)$"
+				},
+				"EmailAddress": {
+					"$id": "#/properties/Customer/properties/EmailAddress",
+					"type": "string",
+					"title": "The Emailaddress Schema",
+					"format": "email",
+					"examples": [
+						"john@ewbbank.com"
+					]
+				},
+				"Gender": {
+					"$id": "#/properties/Customer/properties/Gender",
+					"type": "string",
+					"title": "The Gender Schema",
+					"enum": [
+						"Female",
+						"Male",
+						"Other"
+					],
+					"examples": [
+						"Female"
+					],
+					"pattern": "^(.*)$"
+				},
+				"CountryofDualCitizenship": {
+					"$id": "#/properties/Customer/properties/CountryofDualCitizenship",
+					"type": "string",
+					"title": "The Countryofdualcitizenship Schema",
+					"enum": [
+					"ABW",
+					"AFG",
+					"AGO",
+					"AIA",
+					"ALA",
+					"ALB",
+					"AND",
+					"ANT",
+					"ARE",
+					"ARG",
+					"ARM",
+					"ASM",
+					"ATA",
+					"ATF",
+					"ATG",
+					"AUS",
+					"AUT",
+					"AZE",
+					"BDI",
+					"BEL",
+					"BEN",
+					"BFA",
+					"BGD",
+					"BGR",
+					"BHR",
+					"BHS",
+					"BIH",
+					"BLM",
+					"BLR",
+					"BLZ",
+					"BMU",
+					"BOL",
+					"BRA",
+					"BRB",
+					"BRN",
+					"BTN",
+					"BVT",
+					"BWA",
+					"CAF",
+					"CAN",
+					"CCK",
+					"CHE",
+					"CHL",
+					"CHN",
+					"CIV",
+					"CMR",
+					"COD",
+					"COG",
+					"COK",
+					"COL",
+					"COM",
+					"CPV",
+					"CRI",
+					"CUB",
+					"CXR",
+					"CYM",
+					"CYP",
+					"CZE",
+					"DEU",
+					"DJI",
+					"DMA",
+					"DNK",
+					"DOM",
+					"DZA",
+					"ECU",
+					"EGY",
+					"ERI",
+					"ESH",
+					"ESP",
+					"EST",
+					"ETH",
+					"FIN",
+					"FJI",
+					"FLK",
+					"FRA",
+					"FRO",
+					"FSM",
+					"GAB",
+					"GBR",
+					"GEO",
+					"GGY",
+					"GHA",
+					"GIB",
+					"GIN",
+					"GLP",
+					"GMB",
+					"GNB",
+					"GNQ",
+					"GRC",
+					"GRD",
+					"GRL",
+					"GTM",
+					"GUF",
+					"GUM",
+					"GUY",
+					"HKG",
+					"HMD",
+					"HND",
+					"HRV",
+					"HTI",
+					"HUN",
+					"IDN",
+					"IMN",
+					"IND",
+					"IOT",
+					"IRL",
+					"IRN",
+					"IRQ",
+					"ISL",
+					"ISR",
+					"ITA",
+					"JAM",
+					"JEY",
+					"JOR",
+					"JPN",
+					"KAZ",
+					"KEN",
+					"KGZ",
+					"KHM",
+					"KIR",
+					"KNA",
+					"KOR",
+					"KWT",
+					"LAO",
+					"LBN",
+					"LBR",
+					"LBY",
+					"LCA",
+					"LIE",
+					"LKA",
+					"LSO",
+					"LTU",
+					"LUX",
+					"LVA",
+					"MAC",
+					"MAF",
+					"MAR",
+					"MCO",
+					"MDA",
+					"MDG",
+					"MDV",
+					"MEX",
+					"MHL",
+					"MKD",
+					"MLI",
+					"MLT",
+					"MMR",
+					"MNE",
+					"MNG",
+					"MNP",
+					"MOZ",
+					"MRT",
+					"MSR",
+					"MTQ",
+					"MUS",
+					"MWI",
+					"MYS",
+					"MYT",
+					"NAM",
+					"NCL",
+					"NER",
+					"NFK",
+					"NGA",
+					"NIC",
+					"NIU",
+					"NLD",
+					"NOR",
+					"NPL",
+					"NRU",
+					"NZL",
+					"OMN",
+					"PAK",
+					"PAN",
+					"PCN",
+					"PER",
+					"PHL",
+					"PLW",
+					"PNG",
+					"POL",
+					"PRI",
+					"PRK",
+					"PRT",
+					"PRY",
+					"PSE",
+					"PYF",
+					"QAT",
+					"REU",
+					"ROU",
+					"RUS",
+					"RWA",
+					"SAU",
+					"SDN",
+					"SEN",
+					"SGP",
+					"SGS",
+					"SHN",
+					"SJM",
+					"SLB",
+					"SLE",
+					"SLV",
+					"SMR",
+					"SOM",
+					"SPM",
+					"SRB",
+					"SSD",
+					"STP",
+					"SUR",
+					"SVK",
+					"SVN",
+					"SWE",
+					"SWZ",
+					"SYC",
+					"SYR",
+					"TCA",
+					"TCD",
+					"TGO",
+					"THA",
+					"TJK",
+					"TKL",
+					"TKM",
+					"TLS",
+					"TON",
+					"TTO",
+					"TUN",
+					"TUR",
+					"TUV",
+					"TWN",
+					"TZA",
+					"UGA",
+					"UKR",
+					"UMI",
+					"URY",
+					"USA",
+					"UZB",
+					"VAT",
+					"VCT",
+					"VEN",
+					"VGB",
+					"VIR",
+					"VNM",
+					"VUT",
+					"WLF",
+					"WSM",
+					"YEM",
+					"ZAF",
+					"ZMB",
+					"ZWE"
+					],
+					"examples": [
+						"USA"
+					],
+					"pattern": "^(.*)$"
+				},
+				"EmploymentDate": {
+					"$id": "#/properties/Customer/properties/EmploymentDate",
+					"type": "string",
+					"title": "The Employmentdate Schema",
+					"default": "",
+					"examples": [
+						"1961-02-27"
+					],
+					"pattern": "^(.*)$"
+				},
+				"EmploymentOrSchool": {
+					"$id": "#/properties/Customer/properties/EmploymentOrSchool",
+					"type": "string",
+					"title": "The Employmentorschool Schema",
+					"enum": [
+						"Employed",
+						"Student",
+						"UnEmployed",
+						"Unemployed",
+                                                 "Retired",
+                                                 "Self-employed"
+					],
+					"examples": [
+						"Employed"
+					],
+					"pattern": "^(.*)$"
+				},
+				"Ethnicity": {
+					"$id": "#/properties/Customer/properties/Ethnicity",
+					"type": "string",
+					"title": "The Ethnicity Schema",
+					"enum": [
+						"AfricanAmerican",
+						"Asian",
+						"Caucasian",
+						"ChineseFromChina",
+						"ChineseFromHongKong",
+						"ChineseFromTaiwan",
+						"ChineseFromOther",
+						"Hispanic",
+						"Indonesian",
+						"Japanese"
+					],
+					"examples": [
+						"AfricanAmerican"
+					],
+					"pattern": "^(.*)$"
+				},
+				"MaritalStatus": {
+					"$id": "#/properties/Customer/properties/MaritalStatus",
+					"type": "string",
+					"title": "The Maritalstatus Schema",
+					"enum": [
+						"Divorced",
+						"LegallySeparated",
+						"Married",
+						"Single",
+						"Widowed"
+					],
+					"examples": [
+						"Divorced"
+					],
+					"pattern": "^(.*)$"
+				},
+				"MothersMaidenName": {
+					"$id": "#/properties/Customer/properties/MothersMaidenName",
+					"type": "string",
+					"title": "The Mothersmaidenname Schema",
+					"default": "",
+					"examples": [
+						"Rose"
+					],
+					"pattern": "^(.*)$"
+				},
+				"Occupation": {
+					"$id": "#/properties/Customer/properties/Occupation",
+					"type": "string",
+					"title": "The Occupation Schema",
+					"enum": [
+						"FinanceOrAccounting",
+						"Insurance",
+
+						"Government",
+						"Institution",
+						"Marketing",
+						"Media",
+						"ArtistOrDesignerOrEntertainment",
+						"ArchitectureOrEngineering",
+						"Sales",
+						"Trading",
+						"ScienceOrTechnology",
+						"MarketingOrMediaOrCommunication",
+						"Manufacturing",
+						"Transportation",
+						"HealthcareOrMedicine",
+						"Construction",
+						"EducatorOrTeacher",
+						"Legal",
+						"ServiceOrHospitality",
+						"SkilledLaborer",
+						"Other",
+						"Employed",
+						"Student",
+						"UnemployedOrRetiredOrHomemaker",
+						"ImportOrExportOrTrade",
+						"PublicService",
+						"BusinessOperationsOrAdministrator",
+						"BussinessOwnerOrSelfEmployed" 
+					],
+					"examples": [
+						"FinanceOrAccounting"
+					],
+					"pattern": "^(.*)$"
+				},
+				"W8CertificateDate": {
+					"$id": "#/properties/Customer/properties/W8CertificateDate",
+					"type": "string",
+					"title": "The W8certificatedate Schema",
+					"default": "",
+					"examples": [
+						"1961-02-27"
+					],
+					"pattern": "^(.*)$"
+				},
+				"IsPoliticallyExposedPerson": {
+					"$id": "#/properties/Customer/properties/IsPoliticallyExposedPerson",
+					"type": "string",
+					"title": "The Ispoliticallyexposedperson Schema",
+					"enum": [
+						"Yes",
+						"No"
+					],
+					"examples": [
+						"Yes"
+					],
+					"pattern": "^(.*)$"
+				},
+				"TenPercentShareHolder": {
+					"$id": "#/properties/Customer/properties/TenPercentShareHolder",
+					"type": "string",
+					"title": "TenPercentShareHolder",
+					"enum": [
+						"Yes",
+						"No"
+					],
+					"examples": [
+						"Yes"
+					],
+					"pattern": "^(.*)$"
+				},
+				"CountryResidentCode": {
+					"$id": "#/properties/Customer/properties/CountryResidentCode",
+					"type": "string",
+					"title": "CountryResidentCode",
+					"enum": [
+						"USA",
+						"CHN"
+					],
+					"examples": [
+						"CHN"
+					],
+					"pattern": "^(.*)$"
+				},
+				"CountryOfBirthCode": {
+					"$id": "#/properties/Customer/properties/CountryOfBirthCode",
+					"type": "string",
+					"title": "CountryOfBirthCode",
+					"enum": [
+						"USA",
+						"CHN"
+					],
+					"examples": [
+						"CHN"
+					],
+					"pattern": "^(.*)$"
+				},
+				"Position": {
+					"$id": "#/properties/Customer/properties/Position",
+					"type": "string",
+					"title": "Position",
+					"default": "",
+					"examples": [
+						"CHN"
+					],
+					"pattern": "^(.*)$"
+				},
+				"YearEmployed": {
+					"$id": "#/properties/Customer/properties/YearEmployed",
+					"type": "string",
+					"title": "YearEmployed",
+					"default": "",
+					"examples": [
+						"2018-10-18"
+					],
+					"pattern": "^(.*)$"
+				},
+				"AnnualIncome": {
+					"$id": "#/properties/Customer/properties/AnnualIncome",
+					"type": "string",
+					"title": "AnnualIncome",
+					"default": "",
+					"examples": [
+						"0-25000 USD"
+					],
+					"pattern": "^(.*)$"
+				},
+				"TotalNetWorth": {
+					"$id": "#/properties/Customer/properties/TotalNetWorth",
+					"type": "string",
+					"title": "TotalNetWorth",
+					"default": "",
+					"examples": [
+						"0-25000 USD"
+					],
+					"pattern": "^(.*)$"
+				},
+				"PrimaryBanking": {
+					"$id": "#/properties/Customer/properties/PrimaryBanking",
+					"type": "string",
+					"title": "PrimaryBanking",
+					"default": "",
+					"examples": [
+						"Individual"
+					],
+					"pattern": "^(.*)$"
+				},
+				"EsignIsAccepted": {
+					"$id": "#/properties/Customer/properties/EsignIsAccepted",
+					"type": "string",
+					"title": "EsignIsAccepted",
+					"enum": [
+						"Yes",
+						"No"
+					],
+					"examples": [
+						"Yes"
+					],
+					"pattern": "^(.*)$"
+				},
+				"EsignDateAccepted": {
+					"$id": "#/properties/Customer/properties/EsignDateAccepted",
+					"type": "string",
+					"title": "EsignDateAccepted",
+					"examples": [
+						"2018-11-14"
+					],
+					"pattern": "^(.*)$"
+				},
+				"EsignTimeAccepted": {
+					"$id": "#/properties/Customer/properties/EsignTimeAccepted",
+					"type": "string",
+					"title": "EsignTimeAccepted",
+					"examples": [
+						"22:18:54+08:00"
+					],
+					"pattern": "^(.*)$"
+				},
+				"TermsIsAccepted": {
+					"$id": "#/properties/Customer/properties/TermsIsAccepted",
+					"type": "string",
+					"title": "TermsIsAccepted",
+					"enum": [
+						"Yes",
+						"No"
+					],
+					"examples": [
+						"Yes"
+					],
+					"pattern": "^(.*)$"
+				},
+				"TermsDateAccepted": {
+					"$id": "#/properties/Customer/properties/TermsDateAccepted",
+					"type": "string",
+					"title": "TermsDateAccepted",
+					"examples": [
+						"2018-11-14"
+					],
+					"pattern": "^(.*)$"
+				},
+				"TermsTimeAccepted": {
+					"$id": "#/properties/Customer/properties/TermsTimeAccepted",
+					"type": "string",
+					"title": "TermsTimeAccepted",
+					"examples": [
+						"22:18:54+08:00"
+					],
+					"pattern": "^(.*)$"
+				},
+				"EStatementAccepted": {
+					"$id": "#/properties/Customer/properties/EStatementAccepted",
+					"type": "string",
+					"title": "EsignIsAccepted",
+					"default": null,
+					"enum": [
+						"Yes"
+					],
+					"examples": [
+						"Yes"
+					],
+					"pattern": "^(.*)$"
+				},
+				"EStatementAcceptedDate": {
+					"$id": "#/properties/Customer/properties/EStatementAcceptedDate",
+					"type": "string",
+					"title": "EStatementAcceptedDate",
+					"examples": [
+						"2018-11-14"
+					],
+					"pattern": "^(.*)$"
+				},
+				"EStatementAcceptedTime": {
+					"$id": "#/properties/Customer/properties/EStatementAcceptedTime",
+					"type": "string",
+					"title": "EStatementAcceptedTime",
+					"examples": [
+						"22:18:54+08:00"
+					],
+					"pattern": "^(.*)$"
+				},				
+				"Identification": {
+					"$id": "#/properties/Customer/properties/Identification",
+					"type": "object",
+					"title": "The Identification Schema",
+					"required": [
+						"IsTINAppliedFor"
+					],
+					"properties": {
+						"IsTINAppliedFor": {
+							"$id": "#/properties/Customer/properties/Identification/properties/IsTINAppliedFor",
+							"type": "boolean",
+							"title": "The Istinappliedfor Schema",
+							"default": false,
+							"examples": [
+								true
+							]
+						}
+					}
+				},
+				"NonResidentAccountInformation": {
+					"$id": "#/properties/Customer/properties/NonResidentAccountInformation",
+					"type": "object",
+					"title": "The NonResidentAccountInformation Schema",
+					"required": [
+						"SourceOfWealth",
+						"PurposeOfAccount",						
+						"IncomingWiresLimit",						
+						"OutgoingWiresLimit",
+						"ForeignTaxNumber"
+					],
+					"properties": {
+						"SourceOfWealth": {
+							"$id": "#/properties/Customer/properties/NonResidentAccountInformation/properties/SourceOfWealth",
+							"type": "string",
+							"title": "The Sourceofwealth Schema",
+							"enum": [
+								"Employment",
+								"InheritanceOrTrust",
+								"Investments",
+								"Retirement",
+								"SocialSecurity",
+								"Unemployment",
+								"FamilySupport",
+								"LegalSettlement",
+								"PersonalSavings"
+							],
+							"examples": [
+								"Employment"
+							],
+							"pattern": "^(.*)$"
+						},
+						"PurposeOfAccount": {
+							"$id": "#/properties/Customer/properties/NonResidentAccountInformation/properties/PurposeOfAccount",
+							"type": "string",
+							"title": "The Purposeofaccount Schema",
+							"enum": [
+								"PrimaryBankingRelationship",
+								"Investment",
+								"RealEstatePurchase",
+								"SavingsGeneral",
+								"SavingsEducation",
+								"Other"
+							],
+							"examples": [
+								"PrimaryBankingRelationship"
+							],
+							"pattern": "^(.*)$"
+						},
+						"IntendInternationalWires": {
+							"$id": "#/properties/Customer/properties/NonResidentAccountInformation/properties/IntendInternationalWires",
+							"type": "boolean",
+							"title": "The Intendinternationalwires Schema",
+							"default": false,
+							"examples": [
+								true
+							]
+						},
+						"IntendIncomingWires": {
+							"$id": "#/properties/Customer/properties/NonResidentAccountInformation/properties/IntendIncomingWires",
+							"type": "boolean",
+							"title": "The Intendincomingwires Schema",
+							"default": false,
+							"examples": [
+								true
+							]
+						},
+						"IncomingWiresLimit": {
+							"$id": "#/properties/Customer/properties/NonResidentAccountInformation/properties/IncomingWiresLimit",
+							"type": "string",
+							"title": "The Incomingwireslimit Schema",
+							"enum": [
+							    "No plan",
+							    "No Plan",
+								"ZeroToThreeThousand",
+								"ThreeThousandOneToTenThousand",
+								"TenThousandOneToTwentyFiveThousand",
+								"TwentyFiveThousandOneToFiftyThousand",
+								"FiftyThousandOneToHundredThousand",
+								"GreaterThanHundredThousand"
+							],
+							"examples": [
+								"ZeroToThreeThousand"
+							],
+							"pattern": "^(.*)$"
+						},
+						"IntendOutgoingWires": {
+							"$id": "#/properties/Customer/properties/NonResidentAccountInformation/properties/IntendOutgoingWires",
+							"type": "boolean",
+							"title": "The Intendoutgoingwires Schema",
+							"default": false,
+							"examples": [
+								true
+							]
+						},
+						"OutgoingWiresLimit": {
+							"$id": "#/properties/Customer/properties/NonResidentAccountInformation/properties/OutgoingWiresLimit",
+							"type": "string",
+							"title": "The Outgoingwireslimit Schema",
+							"enum": [
+								"No Plan",
+								"No plan",
+								"ZeroToThreeThousand",
+								"ThreeThousandOneToTenThousand",
+								"TenThousandOneToTwentyFiveThousand",
+								"TwentyFiveThousandOneToFiftyThousand",
+								"FiftyThousandOneToHundredThousand",
+								"GreaterThanHundredThousand"
+							],
+							"examples": [
+								"ZeroToThreeThousand"
+							],
+							"pattern": "^(.*)$"
+						},
+						"VisaType": {
+							"$id": "#/properties/Customer/properties/NonResidentAccountInformation/properties/VisaType",
+							"type": "string",
+							"title": "The Visatype Schema",
+							"enum": [
+								"F1",
+								"H1",
+								"H4",
+								"L1",
+								"L2",
+								"M1",
+								"J1",
+								"EB5",
+								"None",
+								"Other"
+							],
+							"examples": [
+								"H1"
+							],
+							"pattern": "^(.*)$"
+						},
+						"ForeignTaxNumber": {
+							"$id": "#/properties/Customer/properties/NonResidentAccountInformation/properties/ForeignTaxNumber",
+							"type": "string",
+							"title": "The Foreigntaxnumber Schema",
+							"default": "",
+							"examples": [
+								"420303198501162041"
+							],
+							"pattern": "^(.*)$"
+						},
+						"PreferredName": {
+							"$id": "#/properties/Customer/properties/NonResidentAccountInformation/properties/PreferredName",
+							"type": "string",
+							"title": "The Preferredname Schema",
+							"default": "",
+							"examples": [
+								""
+							],
+							"pattern": "^(.*)$"
+						}
+					}
+				}
+			}
+		},
+		"Documents": {
+			"$id": "#/properties/Documents",
+			"type": "array",
+			"title": "The Documents Schema",
+			"items": {
+				"$id": "#/properties/Documents/items",
+				"type": "object",
+				"title": "The Items Schema",
+				"required": [
+					"DocumentName",
+					"DocumentType",
+					"DocumentFrontImage"
+				],
+				"properties": {
+					"DocumentName": {
+						"$id": "#/properties/Documents/items/properties/DocumentName",
+						"type": "string",
+						"title": "The Documentname Schema",
+						"enum": [
+							"Driver License",
+							"Passport",
+							"NationalId",
+							"W8",
+							"Terms and Conditions",
+							"Other"
+						],
+						"examples": [
+							"Driver License"
+						],
+						"pattern": "^(.*)$"
+					},
+					"DocumentType": {
+						"$id": "#/properties/Documents/items/properties/DocumentType",
+						"type": "string",
+						"title": "The Documenttype Schema",
+						"enum": [
+							"PDF",
+							"JPG"
+						],
+						"examples": [
+							"PDF"
+						],
+						"pattern": "^(.*)$"
+					},
+					"DocumentDate": {
+						"$id": "#/properties/Documents/items/properties/DocumentDate",
+						"type": "string",
+						"title": "The Documentdate Schema",
+						"default": "",
+						"examples": [
+							"2018-06-29T17:45:01.000+0000"
+						],
+						"pattern": "^(.*)$"
+					},
+					"DocumentSource": {
+						"$id": "#/properties/Documents/items/properties/DocumentSource",
+						"type": "string",
+						"title": "The Documentsource Schema",
+						"enum": [
+							"DMV",
+							"US Govt",
+							"Chinese Government",
+							"Other"
+						],
+						"examples": [
+							"DMV"
+						],
+						"pattern": "^(.*)$"
+					},
+					"DocumentFrontImage": {
+						"$id": "#/properties/Documents/items/properties/DocumentFrontImage",
+						"type": "string",
+						"title": "The Documentfrontimage Schema",
+						"minLength": 1,
+						"examples": [
+							"/9j/4QAYRXhpZgAASUk="
+						],
+						"pattern": "^(.*)$"
+					},
+					"DocumentBackImage": {
+						"$id": "#/properties/Documents/items/properties/DocumentBackImage",
+						"type": "string",
+						"title": "The Documentbackimage Schema",
+						"default": "",
+						"examples": [
+							"/9j/4QAYRXhpZgAASUk="
+						],
+						"pattern": "^(.*)$"
+					},
+					"CountryCode": {
+						"$id": "#/properties/Documents/items/properties/CountryCode",
+						"type": "string",
+						"title": "The Countrycode Schema",
+						"enum": [
+							"USA",
+							"CHN",
+							""
+						],
+						"examples": [
+							"CHN"
+						],
+						"pattern": "^(.*)$"
+					}
+				}
+			}
+		}
+	}
+}

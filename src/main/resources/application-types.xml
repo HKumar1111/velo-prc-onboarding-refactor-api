@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="input" format="json">
+      <types:example format="json" location="examples/sampleAuthMDinput.json"/>
+    </types:type>
+    <types:type name="output" format="json">
+      <types:example format="json" location="api/request/samplemetadata.json"/>
+    </types:type>
+    <types:type name="sampleinput" format="json">
+      <types:example format="json" location="examples/sampleAuthMDinput.json"/>
+    </types:type>
+    <types:type name="sampleoutput" format="json">
+      <types:example format="json" location="examples/sampleAuthMDoutput.json"/>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#8a6b332d-8b46-4195-b7f0-009238fc4045">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="input"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="output"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#713bd63e-b9f3-4682-9a7d-a7954e7bc207"/>
+  <types:enrichment select="#5e07ac78-3460-46b4-8d20-1c3a1f02ce41"/>
+  <types:enrichment select="#1030c30b-b208-4809-b00e-f3202a5f0829"/>
+  <types:enrichment select="#73043341-39f3-4f7e-beb5-0a7f06087b80"/>
+  <types:enrichment select="#a580a923-0214-4b10-8217-479d1945671b"/>
+  <types:enrichment select="#1e90b5a8-7481-4e83-a36a-06abf803b21b"/>
+  <types:enrichment select="#79782fac-17ab-4e4d-8bd2-f15153c93ec7"/>
+  <types:enrichment select="#5085071a-f1bb-4bec-bcc8-bc30c48715a0"/>
+</types:mule>

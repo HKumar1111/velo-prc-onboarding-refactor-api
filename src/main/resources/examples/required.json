@@ -1,0 +1,510 @@
+{
+  "ApplicationId": "a04m000000BAcfJAAT",
+  "ApplicantType": "NRA",
+  "RequestUUID": "a04m000000BAcfJAAT",
+  "AccountInformation": {
+    "AccountType": "CHK_I_PERS_PREMIER",
+    "CustomerToAccountRelationship": {
+      "AddressLineOfTINOwner": 1,
+      "Customer1AccountAssociationType": "Primary",
+      "Customer1AccountRelationshipCode": "000",
+      "Customer2AccountAssociationType": "Primary",
+      "NumberOfStatementCopies": 1
+    },
+    "DepositAccount": {
+      "WithholdingIndicator": "ExemptAssumed",
+      "UserCode": "D",
+	    "StatusCodes": [
+	      "NeverClose"
+	    ],
+	    "BulkFileType": "ImageFile"
+    },
+    "CardAccount": null
+  },
+  "CustomerInformation": {
+    "Address": {
+      "City": "San Francisco",
+      "CountryCode": "US",
+      "IsForeignAddress": false,
+      "State": "CA",
+      "StreetAddress1": "1100 Market St",
+      "StreetAddress2": "null",
+      "Zip": "94102-3804"
+    },
+    "SourceofFunds": {
+      "Source": "FundfromEMP",
+      "MiscDemographic": 2,
+      "CustomerIntentforIntWireTransfer": {
+        "TransferServices": "Yes/No",
+        "ForeignInActivity": {
+          "ForeignIncomingActivity": "Yes/No",
+          "IncomingWires": 3,
+          "IncomingWiresAmount": 233445.34
+        },
+        "ForeignOutActivity": {
+          "ForeignOutgoingActivity": "Yes/No",
+          "OutgoingWires": 3,
+          "OutgoingWiresAmount": 233445.34
+        }
+      }
+    },
+    "VisaType": "Student",
+    "ForeignTaxID": "3738897489",
+    "BranchNumber": "8088",
+    "CitizenshipCode": "USA",
+    "CostCenterNumber": 88,
+    "CountryOfBirth": "India",
+    "DateOfBirth": "1989-03-04",
+    "EmailAddress": "dds@dds.com",
+    "EmploymentDate": "2015-05-16T16:55:15.467Z",
+    "EmploymentOrSchool": "EWB",
+    "EntityType": "Unknown",
+    "Ethnicity": "AfricanAmerican",
+    "FirstName": "Yanming",
+    "Gender": "Female",
+    "Identification": {
+      "IdentificationInformation1": {
+        "ExpirationDate": "2020-05-16T16:55:15.468Z",
+        "IssueDate": "2010-05-16T16:55:15.468Z",
+        "IssuingEntity": "DMV",
+        "IssuingLocation": "Pasadena",
+        "Number": "F4567",
+        "Type": "DL"
+      },
+      "IdentificationInformation2": {
+        "ExpirationDate": "2028-05-16T16:55:15.468Z",
+        "IssueDate": "2008-05-16T16:55:15.468Z",
+        "IssuingEntity": "US",
+        "IssuingLocation": "Pasadena",
+        "Number": "R4567",
+        "Type": "Passport"
+      },
+      "IsTINAppliedFor": true,
+      "Status": "VerifiedByBanker"
+    },
+    "LastName": "Hu",
+    "MiddleName": "",
+    "MailCode": "NoSpecialAction",
+    "MaritalStatus": "Married",
+    "MothersMaidenName": "Name",
+    "Occupation": "Architecture / Engineering",
+    "PEP": "No",
+    "CISNumber": "00000061099",
+    "PrimaryID": "DL",
+    "PrimaryLanguage": "Chinese",
+    "PrimaryOfficerNumber": 30744,
+    "MobilePhoneNumber": "7656065125",
+    "RequestUUID": "a04m000000BAcfJAAT",
+    "SSN": "991666666",
+    "SSN_Type": "ssn9",
+    "SearchName": "WatchList",
+    "SecondaryOfficerNumber": 30744,
+    "TaxIdType": "SocialSecurityNumber",
+    "TaxNumber": "666176172",
+    "Title": "",
+    "W8CertificateDate": "2018-05-16T16:55:15.467Z",
+    "W8CertificateType": "Blank"
+  },
+  "IdAuthenticationResponse": [
+    {
+      "TransactionID": "b08ee36d-7e6e-46f7-a785-0592b946d40a",
+      "DocumentType": "IdentityCard",
+      "UploadedDt": "2018-07-30T23:20:41",
+      "CountryCode": "CN",
+      "ProductName": "Identity Verification",
+      "Record": {
+        "TransactionRecordID": "a83bdd0f-666a-450f-bcd6-35cad76026a7",
+        "RecordStatus": "nomatch",
+        "DatasourceResults": [
+          {
+            "DatasourceName": "Acuant AssureID Document Verification Test",
+            "DatasourceFields": [],
+            "AppendedFields": [
+              {
+                "FieldName": "AuthenticityReasons",
+                "Data": "DocumentCountryNoMatch"
+              },
+              {
+                "FieldName": "PostalCode",
+                "Data": "78550-0000"
+              },
+              {
+                "FieldName": "City",
+                "Data": "HARLINGEN"
+              },
+              {
+                "FieldName": "YearOfBirth",
+                "Data": "1972"
+              },
+              {
+                "FieldName": "DocumentVerified",
+                "Data": "False"
+              },
+              {
+                "FieldName": "AuthenticityDetails",
+                "Data": "[{\"Name\":\"Birth Date Valid\",\"IsValid\":true,\"Value\":\"1972-11-15T00:00:00\",\"DocumentId\":\"40e7eda7-3a92-45dd-9e34-e00b94cbfe37\",\"Description\":\"The birth date is valid. Verified that the birth date is valid, in the expected format, and occurs on or before the current date and not outside a reasonable range.\",\"Source\":\"VisualInspectionZone\",\"Properties\":\"VIZ Birth Date\"},{\"Name\":\"Document Classification\",\"IsValid\":true,\"Value\":\"Texas (TX) Driver License 2009\",\"DocumentId\":\"609412cb-7ba7-44ff-8fe2-aec34105da7b\",\"Description\":\"The document type is supported. Verified that the document is recognized as a supported document type and that the type of document can be fully authenticated.\",\"Source\":\"\",\"Properties\":\"\"},{\"Name\":\"Document Expired\",\"IsValid\":true,\"Value\":\"2018-11-15T00:00:00\",\"DocumentId\":\"f1b3b344-e3f3-40da-bc4a-88d1ecfad52c\",\"Description\":\"The document has not expired. Verified that the document expiration date does not occur before the current date.\",\"Source\":\"VisualInspectionZone\",\"Properties\":\"VIZ Expiration Date\"},{\"Name\":\"Expiration Date Valid\",\"IsValid\":true,\"Value\":\"2018-11-15T00:00:00\",\"DocumentId\":\"06c57fb2-f1cf-4677-8003-25797fe246bc\",\"Description\":\"The expiration date is valid. Verified that the document expiration date is valid, in the expected format, and occurs after the issue and birth dates.\",\"Source\":\"VisualInspectionZone\",\"Properties\":\"VIZ Expiration Date\"},{\"Name\":\"Issue Date Valid\",\"IsValid\":true,\"Value\":\"2010-07-03T00:00:00\",\"DocumentId\":\"ceb56a03-3502-47e8-a217-d6bde77a4607\",\"Description\":\"The issue date is valid. Verified that the document issue date is valid, in the expected format, does not occur in the future, does not occur before the date of birth, and does not occur after the expiration date.\",\"Source\":\"VisualInspectionZone\",\"Properties\":\"VIZ Issue Date\"},{\"Name\":\"Visible Color Response\",\"IsValid\":true,\"Value\":\"\",\"DocumentId\":\"fd05713e-1569-4750-901d-db622cf0a433\",\"Description\":\"The color response is correct. Verified that a region of the document responds as expected when viewed with white illumination.  This test may be used to (1) verify the integrity of the photo to detect photo substitutions, (2) verify that the document is not counterfeit, or (3) verify that a document has not been tampered with or modified.\",\"Source\":\"\",\"Properties\":\"\"},{\"Name\":\"Visible Color Response\",\"IsValid\":true,\"Value\":\"\",\"DocumentId\":\"84cb897c-f7e6-4917-850b-dcddf4069a91\",\"Description\":\"The color response is correct. Verified that a region of the document responds as expected when viewed with white illumination.  This test may be used to (1) verify the integrity of the photo to detect photo substitutions, (2) verify that the document is not counterfeit, or (3) verify that a document has not been tampered with or modified.\",\"Source\":\"\",\"Properties\":\"\"},{\"Name\":\"Visible Pattern\",\"IsValid\":true,\"Value\":\"\",\"DocumentId\":\"929da7eb-f9ec-49f4-a38a-1957d67ec448\",\"Description\":\"A visible pattern was found. Verified that a security feature in the visible spectrum is present and in an expected location on the document.\",\"Source\":\"\",\"Properties\":\"\"}]"
+              },
+              {
+                "FieldName": "Address1",
+                "Data": "1725 W FILMORE AVE"
+              },
+              {
+                "FieldName": "StateProvince",
+                "Data": "TX"
+              },
+              {
+                "FieldName": "DocumentNumber",
+                "Data": "98765432"
+              },
+              {
+                "FieldName": "FullName",
+                "Data": "MARY ANNA HARPER"
+              },
+              {
+                "FieldName": "FirstName",
+                "Data": "MARY ANNA"
+              },
+              {
+                "FieldName": "LastName",
+                "Data": "HARPER"
+              },
+              {
+                "FieldName": "Issuer",
+                "Data": "Texas"
+              },
+              {
+                "FieldName": "Gender",
+                "Data": "F"
+              },
+              {
+                "FieldName": "DayOfBirth",
+                "Data": "15"
+              },
+              {
+                "FieldName": "MonthOfBirth",
+                "Data": "11"
+              },
+              {
+                "FieldName": "DayOfExpiry",
+                "Data": "15"
+              },
+              {
+                "FieldName": "MonthOfExpiry",
+                "Data": "11"
+              },
+              {
+                "FieldName": "YearOfExpiry",
+                "Data": "2018"
+              },
+              {
+                "FieldName": "DayOfIssue",
+                "Data": "03"
+              },
+              {
+                "FieldName": "MonthOfIssue",
+                "Data": "07"
+              },
+              {
+                "FieldName": "YearOfIssue",
+                "Data": "2010"
+              }
+            ],
+            "Errors": [],
+            "FieldGroups": []
+          }
+        ],
+        "Errors": [],
+        "Rule": {
+          "RuleName": "RuleScript DocumentVerification",
+          "Note": "Script manually created"
+        }
+      },
+      "Errors": []
+    },{
+      "TransactionID": "b08ee36d-7e6e-46f7-a785-0592b946d40a",
+      "DocumentType": "IdentityCard",
+      "UploadedDt": "2018-07-30T23:20:41",
+      "CountryCode": "CN",
+      "ProductName": "Identity Verification",
+      "Record": {
+        "TransactionRecordID": "a83bdd0f-666a-450f-bcd6-35cad76026a7",
+        "RecordStatus": "match",
+        "DatasourceResults": [
+          {
+            "DatasourceName": "Acuant AssureID Document Verification Test",
+            "DatasourceFields": [],
+            "AppendedFields": [
+              {
+                "FieldName": "AuthenticityReasons",
+                "Data": "DocumentCountryNoMatch"
+              },
+              {
+                "FieldName": "PostalCode",
+                "Data": "78550-0000"
+              },
+              {
+                "FieldName": "City",
+                "Data": "HARLINGEN"
+              },
+              {
+                "FieldName": "YearOfBirth",
+                "Data": "1972"
+              },
+              {
+                "FieldName": "DocumentVerified",
+                "Data": "False"
+              },
+              {
+                "FieldName": "AuthenticityDetails",
+                "Data": "[{\"Name\":\"Birth Date Valid\",\"IsValid\":true,\"Value\":\"1972-11-15T00:00:00\",\"DocumentId\":\"40e7eda7-3a92-45dd-9e34-e00b94cbfe37\",\"Description\":\"The birth date is valid. Verified that the birth date is valid, in the expected format, and occurs on or before the current date and not outside a reasonable range.\",\"Source\":\"VisualInspectionZone\",\"Properties\":\"VIZ Birth Date\"},{\"Name\":\"Document Classification\",\"IsValid\":true,\"Value\":\"Texas (TX) Driver License 2009\",\"DocumentId\":\"609412cb-7ba7-44ff-8fe2-aec34105da7b\",\"Description\":\"The document type is supported. Verified that the document is recognized as a supported document type and that the type of document can be fully authenticated.\",\"Source\":\"\",\"Properties\":\"\"},{\"Name\":\"Document Expired\",\"IsValid\":true,\"Value\":\"2018-11-15T00:00:00\",\"DocumentId\":\"f1b3b344-e3f3-40da-bc4a-88d1ecfad52c\",\"Description\":\"The document has not expired. Verified that the document expiration date does not occur before the current date.\",\"Source\":\"VisualInspectionZone\",\"Properties\":\"VIZ Expiration Date\"},{\"Name\":\"Expiration Date Valid\",\"IsValid\":true,\"Value\":\"2018-11-15T00:00:00\",\"DocumentId\":\"06c57fb2-f1cf-4677-8003-25797fe246bc\",\"Description\":\"The expiration date is valid. Verified that the document expiration date is valid, in the expected format, and occurs after the issue and birth dates.\",\"Source\":\"VisualInspectionZone\",\"Properties\":\"VIZ Expiration Date\"},{\"Name\":\"Issue Date Valid\",\"IsValid\":true,\"Value\":\"2010-07-03T00:00:00\",\"DocumentId\":\"ceb56a03-3502-47e8-a217-d6bde77a4607\",\"Description\":\"The issue date is valid. Verified that the document issue date is valid, in the expected format, does not occur in the future, does not occur before the date of birth, and does not occur after the expiration date.\",\"Source\":\"VisualInspectionZone\",\"Properties\":\"VIZ Issue Date\"},{\"Name\":\"Visible Color Response\",\"IsValid\":true,\"Value\":\"\",\"DocumentId\":\"fd05713e-1569-4750-901d-db622cf0a433\",\"Description\":\"The color response is correct. Verified that a region of the document responds as expected when viewed with white illumination.  This test may be used to (1) verify the integrity of the photo to detect photo substitutions, (2) verify that the document is not counterfeit, or (3) verify that a document has not been tampered with or modified.\",\"Source\":\"\",\"Properties\":\"\"},{\"Name\":\"Visible Color Response\",\"IsValid\":true,\"Value\":\"\",\"DocumentId\":\"84cb897c-f7e6-4917-850b-dcddf4069a91\",\"Description\":\"The color response is correct. Verified that a region of the document responds as expected when viewed with white illumination.  This test may be used to (1) verify the integrity of the photo to detect photo substitutions, (2) verify that the document is not counterfeit, or (3) verify that a document has not been tampered with or modified.\",\"Source\":\"\",\"Properties\":\"\"},{\"Name\":\"Visible Pattern\",\"IsValid\":true,\"Value\":\"\",\"DocumentId\":\"929da7eb-f9ec-49f4-a38a-1957d67ec448\",\"Description\":\"A visible pattern was found. Verified that a security feature in the visible spectrum is present and in an expected location on the document.\",\"Source\":\"\",\"Properties\":\"\"}]"
+              },
+              {
+                "FieldName": "Address1",
+                "Data": "1725 W FILMORE AVE"
+              },
+              {
+                "FieldName": "StateProvince",
+                "Data": "TX"
+              },
+              {
+                "FieldName": "DocumentNumber",
+                "Data": "98765432"
+              },
+              {
+                "FieldName": "FullName",
+                "Data": "MARY ANNA HARPER"
+              },
+              {
+                "FieldName": "FirstName",
+                "Data": "MARY ANNA"
+              },
+              {
+                "FieldName": "LastName",
+                "Data": "HARPER"
+              },
+              {
+                "FieldName": "Issuer",
+                "Data": "Texas"
+              },
+              {
+                "FieldName": "Gender",
+                "Data": "F"
+              },
+              {
+                "FieldName": "DayOfBirth",
+                "Data": "15"
+              },
+              {
+                "FieldName": "MonthOfBirth",
+                "Data": "11"
+              },
+              {
+                "FieldName": "DayOfExpiry",
+                "Data": "15"
+              },
+              {
+                "FieldName": "MonthOfExpiry",
+                "Data": "11"
+              },
+              {
+                "FieldName": "YearOfExpiry",
+                "Data": "2018"
+              },
+              {
+                "FieldName": "DayOfIssue",
+                "Data": "03"
+              },
+              {
+                "FieldName": "MonthOfIssue",
+                "Data": "07"
+              },
+              {
+                "FieldName": "YearOfIssue",
+                "Data": "2010"
+              }
+            ],
+            "Errors": [],
+            "FieldGroups": []
+          }
+        ],
+        "Errors": [],
+        "Rule": {
+          "RuleName": "RuleScript DocumentVerification",
+          "Note": "Script manually created"
+        }
+      },
+      "Errors": []
+    },
+    {
+      "TransactionID": "b08ee36d-7e6e-46f7-a785-0592b946d40a",
+      "DocumentType": "Passport",
+      "UploadedDt": "2018-07-30T23:20:41",
+      "CountryCode": "CN",
+      "ProductName": "Identity Verification",
+      "Record": {
+        "TransactionRecordID": "a83bdd0f-666a-450f-bcd6-35cad76026a7",
+        "RecordStatus": "match",
+        "DatasourceResults": [
+          {
+            "DatasourceName": "Acuant AssureID Document Verification Test",
+            "DatasourceFields": [],
+            "AppendedFields": [
+              {
+                "FieldName": "AuthenticityReasons",
+                "Data": "DocumentCountryNoMatch"
+              },
+              {
+                "FieldName": "PostalCode",
+                "Data": "78550-0000"
+              },
+              {
+                "FieldName": "City",
+                "Data": "HARLINGEN"
+              },
+              {
+                "FieldName": "YearOfBirth",
+                "Data": "1972"
+              },
+              {
+                "FieldName": "DocumentVerified",
+                "Data": "False"
+              },
+              {
+                "FieldName": "AuthenticityDetails",
+                "Data": "[{\"Name\":\"Birth Date Valid\",\"IsValid\":true,\"Value\":\"1972-11-15T00:00:00\",\"DocumentId\":\"40e7eda7-3a92-45dd-9e34-e00b94cbfe37\",\"Description\":\"The birth date is valid. Verified that the birth date is valid, in the expected format, and occurs on or before the current date and not outside a reasonable range.\",\"Source\":\"VisualInspectionZone\",\"Properties\":\"VIZ Birth Date\"},{\"Name\":\"Document Classification\",\"IsValid\":true,\"Value\":\"Texas (TX) Driver License 2009\",\"DocumentId\":\"609412cb-7ba7-44ff-8fe2-aec34105da7b\",\"Description\":\"The document type is supported. Verified that the document is recognized as a supported document type and that the type of document can be fully authenticated.\",\"Source\":\"\",\"Properties\":\"\"},{\"Name\":\"Document Expired\",\"IsValid\":true,\"Value\":\"2018-11-15T00:00:00\",\"DocumentId\":\"f1b3b344-e3f3-40da-bc4a-88d1ecfad52c\",\"Description\":\"The document has not expired. Verified that the document expiration date does not occur before the current date.\",\"Source\":\"VisualInspectionZone\",\"Properties\":\"VIZ Expiration Date\"},{\"Name\":\"Expiration Date Valid\",\"IsValid\":true,\"Value\":\"2018-11-15T00:00:00\",\"DocumentId\":\"06c57fb2-f1cf-4677-8003-25797fe246bc\",\"Description\":\"The expiration date is valid. Verified that the document expiration date is valid, in the expected format, and occurs after the issue and birth dates.\",\"Source\":\"VisualInspectionZone\",\"Properties\":\"VIZ Expiration Date\"},{\"Name\":\"Issue Date Valid\",\"IsValid\":true,\"Value\":\"2010-07-03T00:00:00\",\"DocumentId\":\"ceb56a03-3502-47e8-a217-d6bde77a4607\",\"Description\":\"The issue date is valid. Verified that the document issue date is valid, in the expected format, does not occur in the future, does not occur before the date of birth, and does not occur after the expiration date.\",\"Source\":\"VisualInspectionZone\",\"Properties\":\"VIZ Issue Date\"},{\"Name\":\"Visible Color Response\",\"IsValid\":true,\"Value\":\"\",\"DocumentId\":\"fd05713e-1569-4750-901d-db622cf0a433\",\"Description\":\"The color response is correct. Verified that a region of the document responds as expected when viewed with white illumination.  This test may be used to (1) verify the integrity of the photo to detect photo substitutions, (2) verify that the document is not counterfeit, or (3) verify that a document has not been tampered with or modified.\",\"Source\":\"\",\"Properties\":\"\"},{\"Name\":\"Visible Color Response\",\"IsValid\":true,\"Value\":\"\",\"DocumentId\":\"84cb897c-f7e6-4917-850b-dcddf4069a91\",\"Description\":\"The color response is correct. Verified that a region of the document responds as expected when viewed with white illumination.  This test may be used to (1) verify the integrity of the photo to detect photo substitutions, (2) verify that the document is not counterfeit, or (3) verify that a document has not been tampered with or modified.\",\"Source\":\"\",\"Properties\":\"\"},{\"Name\":\"Visible Pattern\",\"IsValid\":true,\"Value\":\"\",\"DocumentId\":\"929da7eb-f9ec-49f4-a38a-1957d67ec448\",\"Description\":\"A visible pattern was found. Verified that a security feature in the visible spectrum is present and in an expected location on the document.\",\"Source\":\"\",\"Properties\":\"\"}]"
+              },
+              {
+                "FieldName": "Address1",
+                "Data": "1725 W FILMORE AVE"
+              },
+              {
+                "FieldName": "StateProvince",
+                "Data": "TX"
+              },
+              {
+                "FieldName": "DocumentNumber",
+                "Data": "98765432"
+              },
+              {
+                "FieldName": "FullName",
+                "Data": "MARY ANNA HARPER"
+              },
+              {
+                "FieldName": "FirstName",
+                "Data": "MARY ANNA"
+              },
+              {
+                "FieldName": "LastName",
+                "Data": "HARPER"
+              },
+              {
+                "FieldName": "Issuer",
+                "Data": "Texas"
+              },
+              {
+                "FieldName": "Gender",
+                "Data": "F"
+              },
+              {
+                "FieldName": "DayOfBirth",
+                "Data": "15"
+              },
+              {
+                "FieldName": "MonthOfBirth",
+                "Data": "11"
+              },
+              {
+                "FieldName": "DayOfExpiry",
+                "Data": "15"
+              },
+              {
+                "FieldName": "MonthOfExpiry",
+                "Data": "11"
+              },
+              {
+                "FieldName": "YearOfExpiry",
+                "Data": "2018"
+              },
+              {
+                "FieldName": "DayOfIssue",
+                "Data": "03"
+              },
+              {
+                "FieldName": "MonthOfIssue",
+                "Data": "07"
+              },
+              {
+                "FieldName": "YearOfIssue",
+                "Data": "2010"
+              }
+            ],
+            "Errors": [],
+            "FieldGroups": []
+          }
+        ],
+        "Errors": [],
+        "Rule": {
+          "RuleName": "RuleScript DocumentVerification",
+          "Note": "Script manually created"
+        }
+      },
+      "Errors": []
+    }
+  ],
+  "IdVerificationRequest": {
+    "AcceptTruliooTermsAndConditions": true,
+    "CleansedAddress": false,
+    "VerboseMode": true,
+    "ConfigurationName": "Identity Verification",
+    "CountryCode": "CN",
+    "DataFields": {
+      "PersonInfo": {
+        "FirstGivenName": "言明",
+        "FirstSurName": "胡",
+        "DayOfBirth": 5,
+        "MonthOfBirth": 6,
+        "YearOfBirth": 1976
+      },
+      "NationalIds": [
+        {
+          "IDNumber": "440861896421345987",
+          "Type": "NationalID"
+        }
+      ]
+    }
+  },
+  "PinPointRequest": [
+    {
+      "handler": "session_info",
+      "customer_session_id": "158Ctioo31eE0Um9GYvrHHRrm",
+      "remote_addr": "59.165.215.253",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36",
+      "result": "pass",
+      "channel": "online",
+      "new_account_data": {
+        "new_account": true,
+        "first_name": "Varsha",
+        "last_name": "KS",
+        "phone_number": "7767767766",
+        "email": "depositdemo@ewb.com"
+      }
+    },
+    {
+      "handler": "pinpoint_eval",
+      "customer_session_id": "158Ctioo31eE0Um9GYvrHHRrm",
+      "remote_addr": "59.165.215.253",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36",
+      "activity": "new_account",
+      "url": "http://uat-eastwestbank.cs95.force.com/tf4sf__dsp#/get-started",
+      "timestamp": "2018-07-20 11:12:37"
+    }
+  ],
+  "Promotions": {
+    "OnboardingInvitation": {
+      "EmailAddress": "dds@dds.com",
+      "PhoneNumber": "7656065125"
+    },
+    "PromoCode": "Y834KCUH",
+    "Status": "New"
+  }
+}

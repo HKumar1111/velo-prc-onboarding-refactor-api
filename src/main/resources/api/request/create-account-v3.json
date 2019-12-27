@@ -1,0 +1,143 @@
+{
+  "RequestUUID": "35650bbd-4947-45c4-9113-76a5ce901d5a",
+  "ApplicantType": "NRA-CHN",
+  "Partner": {
+    "ApplicationIp": "127.222.344.233",
+    "Channel": "Web",
+    "PartnerId": "31000112989075",
+    "VerificationResults": "Approved",
+    "PartnerName": "Name of the Partner"
+  },
+  "Operation": "Create",
+  "Accounts": [
+    {
+      "AccountType": "Deposit",
+      "AccountName": "US Checking",
+      "CardHolderName1": "",
+      "CardHolderName2": "",
+      "CustomerToAccountRelationship": [
+        {
+          "CustomerAccountRelationshipCode": "000",
+          "CustomerAccountAssociationType": "Primary",
+          "NumberOfStatementCopies": 1
+        }
+      ],
+      "CardForeignAddress": {
+        "StreetAddress1": "5398 41WK VW DSW 6D",
+        "StreetAddress2": "",
+        "City": "ASTORIA",
+        "State": "NY",
+        "Zip": "11105",
+        "CountryCode": "US"
+      }
+    }
+  ],
+  "Customer": {
+    "Names": [
+      {
+        "Type": "English",
+        "FirstName": "FLORENCE",
+        "LastName": "BIEGUN",
+        "MiddleInitial": "",
+        "Title": ""
+      },
+      {
+        "Type": "Other",
+        "FirstName": "FLORENCE",
+        "LastName": "BIEGUN",
+        "MiddleInitial": "",
+        "Title": ""
+      }
+    ],
+    "DateOfBirth": "1951-02-27",
+    "Addresses": [
+      {
+        "Type": "MailingAddress",
+        "StreetAddress1": "1100 Market St",
+        "StreetAddress2": "null",
+        "City": "San Francisco",
+        "State": "CA",
+        "Zip": "94102-3804",
+        "CountryCode": "US"
+      },
+      {
+        "Type": "Primary",
+        "StreetAddress1": "1100 Market St",
+        "StreetAddress2": "null",
+        "City": "San Francisco",
+        "State": "CA",
+        "Zip": "94102-3804",
+        "CountryCode": "US"
+      },
+      {
+        "Type": "Other",
+        "StreetAddress1": "1100 Market St",
+        "StreetAddress2": "null",
+        "City": "San Francisco",
+        "State": "CA",
+        "Zip": "94102-3804",
+        "CountryCode": "US"
+      }
+    ],
+    "ContactInformation": [
+      {
+        "Type": "Primary",
+        "Number": "1085551212"
+      }
+    ],
+    "TaxNumber": "",
+    "TaxIdType": "",
+    "BirthPlace": "",
+    "CitizenshipCode": "CHN",
+    "W8CertificateType": "W8BenNoCert",
+    "PrimaryID": "Passport",
+    "MailCode": "CallForStatement",
+    "PrimaryLanguage": "Chinese",
+    "EmailAddress": "john@ewbbank.com",
+    "Gender": "Female",
+    "CountryofDualCitizenship": "USA",
+    "EmploymentDate": "1961-02-27",
+    "EmploymentOrSchool": "Employed",
+    "Ethnicity": "AfricanAmerican",
+    "MaritalStatus": "Divorced",
+    "MothersMaidenName": "Rose",
+    "Occupation": "AdminOrClerical",
+    "W8CertificateDate": "1961-02-27",
+    "IsPoliticallyExposedPerson": true,
+    "Identification": {
+      "IsTINAppliedFor": true
+    },
+    "NonResidentAccountInformation": {
+      "SourceOfWealth": "Employment",
+      "PurposeOfAccount": "BillPay",
+      "IntendInternationalWires": true,
+      "IntendIncomingWires": true,
+      "IncomingWiresLimit": "0-3000",
+      "IntendOutgoingWires": true,
+      "OutgoingWiresLimit": "0-3000",
+      "VisaType": "H1",
+      "ForeignTaxNumber": "420303198501162041",
+      "PreferredName": ""
+    }
+  },
+  "Documents": [
+    {
+      "DocumentName": "Driver License",
+      "DocumentType": "PDF",
+      "DocumentDate": "2018-06-29T17:45:01.000+0000",
+      "DocumentSource": "DMV",
+      "DocumentFrontImage": "/9j/4QAYRXhpZgAASUk=",
+      "DocumentBackImage": "/9j/4QAYRXhpZgAASUk=",
+      "CountryCode": "CHN"
+    },
+    {
+      "DocumentName": "Passport",
+      "DocumentType": "PDF",
+      "DocumentDate": "2018-06-29T17:45:01.000+0000",
+      "DocumentSource": "US Govt",
+      "DocumentFrontImage": "/9j/4QAYRXhpZgAASUk=",
+      "DocumentBackImage": "/9j/4QAYRXhpZgAASUk=",
+      "CountryCode": "CHN"
+    }
+  ]
+}

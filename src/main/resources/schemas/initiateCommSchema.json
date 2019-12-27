@@ -1,0 +1,125 @@
+ {
+   "definitions": {},
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "$id": "http://example.com/root.json",
+   "type": "object",
+   "title": "The Root Schema",
+   "required": [
+     "cis",
+     "correlationId",
+     "type",
+     "activityId",
+     "message",
+     "channel",
+     "country",
+     "mobileCountryCode"
+     ],
+   "properties": {
+     "cis": {
+       "$id": "#/properties/cis",
+       "type": "string",
+       "title": "The Cis Schema",
+       "default": "",
+       "examples": [
+         "11111"
+       ],
+       "pattern": "^(.*)$"
+     },
+     "correlationId": {
+       "$id": "#/properties/correlationId",
+       "type": "string",
+       "title": "The Correlationid Schema",
+       "default": "",
+       "examples": [
+         "b34250bf-7a57-4216-87f5-42cf8bb23d9"
+       ],
+       "pattern": "^(.*)$"
+     },
+     "type": {
+       "$id": "#/properties/type",
+       "type": "string",
+       "title": "The type communication",
+       "enum": ["Sms","Email"],
+       "default": "",
+       "examples": [
+         ["Sms","Email"]
+       ],
+       "pattern": "^(.*)$"
+     },
+     "activityId": {
+       "$id": "#/properties/activityId",
+       "type": "string",
+       "title": "The Activityid Schema",
+       "default": "",
+       "examples": [
+         "Overdraft"
+       ],
+       "pattern": "^(.*)$"
+     },
+     "message": {
+       "$id": "#/properties/message",
+       "type": "string",
+       "title": "The Message Schema",
+       "default": "",
+       "examples": [
+         "Custom Customer Message if Any"
+       ],
+       "pattern": "^(.*)$"
+     },
+     "channel": {
+       "$id": "#/properties/channel",
+       "type": "string",
+       "title": "The Channel Schema",
+       "enum": ["Salesforce", "Msd"],
+       "default": "",
+       "examples": [
+         ["Salesforce","Msd"]
+       ],
+       "pattern": "^(.*)$"
+     },
+     "country": {
+       "$id": "#/properties/country",
+       "type": "string",
+       "title": "The Country Schema",
+       "default": "",
+       "examples": [
+         "CHN"
+       ],
+       "pattern": "^(.*)$"
+     },
+     "mobile": {
+       "$id": "#/properties/mobile",
+       "type": "string",
+       "title": "The Mobile Schema",
+       "default": "",
+       "examples": [
+         ""
+       ],
+       "pattern": "^(.*)$"
+     },
+     "email": {
+       "$id": "#/properties/email",
+       "type": "string",
+       "title": "The Email Schema",
+       "default": "",
+       "examples": [
+         ""
+       ],
+       "pattern": "^(.*)$"
+     },
+     "mobileCountryCode": {
+       "$id": "#/properties/mobileCountryCode",
+       "type": "string",
+       "title": "The mobileCountryCode Schema",
+       "enum": [
+	       	"+1",
+	       	"+86"
+       ],
+       "examples": [
+	       	"+1",
+	       	"+86"
+       ],
+       "pattern": "^(.*)$"
+     }
+   }
+ }

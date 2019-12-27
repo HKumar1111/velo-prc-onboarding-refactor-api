@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:java="http://www.mulesoft.org/schema/mule/java"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd">
+	
+	<flow name="partner-account-creation-flow-v2" doc:id="32a33e5c-9343-4e1b-8185-da38e4305623" >
+		<ee:transform doc:name="Transform Message" doc:id="04d466e1-6eb4-4ba5-9c2b-c3b7d3e49622">
+            <ee:message />
+            <ee:variables>
+				<ee:set-variable variableName="applicationStatus" ><![CDATA[%dw 2.0
+output application/json
+---
+payload..VerificationResults[0] default null]]></ee:set-variable>
+				<ee:set-variable variableName="Operation" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Operation default null]]></ee:set-variable>
+				<ee:set-variable variableName="payloadMap" ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-variable>
+				<ee:set-variable variableName="InputPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+				<ee:set-variable variableName="PartnerId" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Partner.PartnerId]]></ee:set-variable>
+				<ee:set-variable variableName="accountType" ><![CDATA[%dw 2.0
+output text/plain
+---
+payload..AccountType[0] as String]]></ee:set-variable>
+            
+</ee:variables>
+        </ee:transform>
+        <ee:transform doc:name="Transform Message" doc:id="055d898b-bb36-4e64-9199-b2aa488a607d">
+					<ee:message>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="documentNationalId"><![CDATA[%dw 2.0
+output application/json
+---
+payload.Documents filter ($.DocumentName == "NationalId") default []]]></ee:set-variable>
+				<ee:set-variable variableName="mailingAddress" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Customer.Addresses filter (($.Type == "MailingAddress") or ($.Type == "ChineseMailingAddress")) default null]]></ee:set-variable>
+				<ee:set-variable variableName="primaryAddress" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Customer.Addresses filter ($.Type == "PrimaryAddress") default null]]></ee:set-variable>
+				<ee:set-variable variableName="primaryChineseAddress" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Customer.Addresses filter ($.Type == "PrimaryChineseAddress") default null]]></ee:set-variable>
+<ee:set-variable variableName="mailingChineseAddress" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Customer.Addresses filter ($.Type == "MailingChineseAddress") default null]]></ee:set-variable>
+				<ee:set-variable variableName="customerNameEnglish" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Customer.Names filter ($.Type == "English")]]></ee:set-variable>
+				<ee:set-variable variableName="customerNameChinese" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Customer.Names filter ($.Type == "Chinese")]]></ee:set-variable>
+					</ee:variables>
+					
+				</ee:transform>
+		<choice doc:name="Choice" doc:id="522f8430-28e5-425f-9cbe-b9dc2e7cd275" >
+			<when expression='#[vars.accountType == "CUP_CARD"]'>
+				<flow-ref doc:name="partner-payload-cup_card-validation-v2" doc:id="364df524-7e3a-4228-8e85-00d2cae9ef94" name="partner-payload-cup_card-validation-v2" />
+			</when>
+			<otherwise >
+				<flow-ref doc:name="partner-payload-validation-v2" doc:id="cfb055a1-b2a7-4182-8c02-3786a9dfdf15" name="partner-payload-validation-v2" />
+			</otherwise>
+		</choice>
+		<flow-ref doc:name="SalesforceMainFlowV2" doc:id="c211e12e-c906-49de-8322-080a397f8252" name="SalesforceMainFlowV2"/>
+		<flow-ref doc:name="createAccountPostSchemaValidation" doc:id="ef645584-81f5-4615-aac3-8da56f7076cf" name="createAccountPostSchemaValidation" />
+		<error-handler>
+            <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="0894ed9d-66d1-4170-b293-5f9861ecc5e1">
+                <ee:transform doc:name="Error Response" doc:id="ce7948c8-334b-4ca8-a81b-6c459a6ba676">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message": "failed",
+	"ApplicationId": vars.applicationData.id,
+	"ApplicationName": vars.applicationName.Name,
+	"ResponseCode": if(error.errorType.identifier == "UNAUTHORIZED" )
+        			401
+        		else
+        			400,
+    "Reasons": [{
+    	"ReasonCode": if(error.errorType.identifier == "UNAUTHORIZED" )
+        			401
+        		else
+        			400,
+     	"ReasonDescription":  if (vars.functionalError != null) 
+     							vars.functionalError 	
+     						  else 
+     						  	" Exception found in Experience Flow "
+        
+    }]
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/json
+---
+if(error.errorType.identifier == "UNAUTHORIZED" )
+	"401"
+else
+	"400"]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-continue>
+        </error-handler>
+	</flow>
+	
+	
+	<sub-flow name="partner-payload-validation-v2" doc:id="9db07455-90ed-4821-83d6-33efc50b55da" >
+	<choice doc:name="Choice" doc:id="95860016-69ab-4a1a-845d-a8e39e369f0f">
+            <when expression='payload.ApplicantType == "NonNRA"'>
+                <set-variable value="createAccountSchemaNoNNRAv2" doc:name="Set Variable" doc:id="560f56c1-6d73-4764-a685-7800d99d2dbb" variableName="schema" />
+				<java:invoke-static doc:name="Invoke static" doc:id="bfa66fce-b006-404c-93d2-ff145fdde591" class="com.velo.Validation" method="validate(LinkedHashMap,String)" target="errorList">
+					<java:args ><![CDATA[#[{arg0: vars.payloadMap,arg1: vars.schema}]]]></java:args>
+				</java:invoke-static>
+				
+				<choice doc:name="Choice" doc:id="d9b23638-660c-4141-ba91-1f9262a8a992" >
+					<when expression="#[sizeOf(vars.documentNationalId) &gt;0]">
+						<logger level="INFO" doc:name="Logger" doc:id="d6584b52-f522-4deb-9268-c1596a5271fe" message="Payload validator"/>
+						<choice doc:name="Choice" doc:id="6e22a6de-911c-4b00-88ff-76a855baead7" >
+			<when expression='#[vars.documentNationalId.DocumentFrontImage == null or vars.documentNationalId.DocumentBackImage == null]' >
+				<ee:transform doc:name="Transform Message" doc:id="93aa941a-7a01-4cf7-89d5-c5ea698102f1">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+						<ee:set-variable variableName="docErrorList" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	
+	ResponseCode : 600,
+	ResponseDescription : "required key [DocumentFirstName Or DocumentBackImage] not found for fields #/Documents/"
+	
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+				<ee:transform doc:name="Transform Message" doc:id="73798f37-8ee2-4a31-87bc-570b7abe9649" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="errorList" ><![CDATA[%dw 2.0
+output application/json
+---
+
+	
+	(vars.errorList default []) as Array ++ [{ResponseCode : 600,
+	ResponseDescription : "required key [NationalID DocumentFrontImage Or DocumentBackImage] not found for fields #/Documents/"}]
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="28771f73-0fd5-4d7f-b89c-8773e0ed4dae" message="Document validation is good"/>
+			</otherwise>
+		</choice>
+					</when>
+					<otherwise>
+						<logger level="INFO" doc:name="Logger" doc:id="4fe1f476-c188-4a8e-8bcf-31e803c4a92b" message="Document object is null"/>
+					</otherwise>
+				</choice>
+            
+
+</when>
+            <when expression='payload.ApplicantType == "NRA-CHN"'>
+                <set-variable value="createAccountSchemaV2" doc:name="Set Variable" doc:id="b052af85-8970-435d-a92f-f1b0ac0ddd62" variableName="schema" />
+				<java:invoke-static doc:name="Invoke static" doc:id="821f7774-b7b8-487a-8dd8-d3f4daefab97" class="com.velo.Validation" method="validate(LinkedHashMap,String)" target="errorList">
+					<java:args ><![CDATA[#[{arg0: vars.payloadMap,arg1: vars.schema}]]]></java:args>
+				</java:invoke-static>
+				
+				<java:invoke-static doc:name="AddressValidation" doc:id="1e525441-f2db-4dde-b43e-abe1189a452b" class="com.velo.AddressValidation" method="validation(LinkedHashMap)" target="addressErrorList">
+					<java:args ><![CDATA[#[{arg0: vars.payloadMap}]]]></java:args>
+				</java:invoke-static>
+				<ee:transform doc:name="Transform Message" doc:id="e47d96a2-b0d5-47d4-ad8a-82082b9d452d">
+					<ee:message>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="errorList" ><![CDATA[%dw 2.0
+output application/json
+---
+vars.errorList ++ vars.addressErrorList
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<flow-ref doc:name='customerNameSize-validation' doc:id="8ad91063-d604-42ac-9723-89fa7c9dd56f" name="customerNameSize-validation"/>
+				<choice doc:name="Choice" doc:id="44e13876-58d2-4f00-8562-1c5eef117900" >
+			<when expression="#[((vars.documentNationalId.DocumentFrontImage == null or vars.documentNationalId.DocumentBackImage == null) and vars.isReSubmit == false)]" >
+				<ee:transform doc:name="Transform Message" doc:id="e2cab128-c662-412a-b48d-a3aa7165a17a">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+						<ee:set-variable variableName="docErrorList" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	
+	ResponseCode : 600,
+	ResponseDescription : "required key [DocumentFirstName Or DocumentBackImage] not found for fields #/Documents/"
+	
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+				<ee:transform doc:name="Transform Message" doc:id="569d0829-c0d3-4951-ae49-843a735868b7" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="errorList" ><![CDATA[%dw 2.0
+output application/json
+---
+
+	
+	(vars.errorList default []) as Array ++ [{ResponseCode : 600,
+	ResponseDescription : "required key [NationalID DocumentFrontImage Or DocumentBackImage] not found for fields #/Documents/"}]
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="15bce9a0-30a3-4e1f-895a-9be70bb4f6b2" />
+			</otherwise>
+		</choice>
+            
+</when>
+			<otherwise>
+                <set-variable value="Not a valid ApplicantType" doc:name="Set Variable" doc:id="bc604d65-a0bc-4392-ba30-81c2567c5fbe" variableName="errorList" />
+            </otherwise>
+        </choice>
+		<ee:transform doc:name="Validate Country Dialing Code and Number" doc:id="935564fc-60b5-4ff4-9afa-06d41089afbb" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="errorList" ><![CDATA[%dw 2.0
+output application/java
+var CountryCallingCodesList = ((p("country.callingcodes") default "") splitBy ",")
+---
+if ((vars.errorList != null) and (vars.errorList is String)) 
+	vars.errorList
+else
+	((vars.errorList default []) ++ 
+	((vars.payloadMap.Customer.ContactInformation default []) filter (((CountryCallingCodesList contains $.CountryCode) and (($.Number default "") matches  /^[0-9]{10,11}$/)) and ((sizeOf($.Number) as String) != ((p("country.callingcode." ++ ($.CountryCode))) default "")  ) ) map {
+		"ResponseCode": 600,
+		"ResponseDescription": ("Phone Number " ++ ($.Number default "") ++ " with Calling Code " ++ $.CountryCode ++ " is invalid, it should be of " ++ ((p("country.callingcode." ++ ($.CountryCode))) default "") ++ " digits")	
+	}))]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>        
+	</sub-flow>
+	<sub-flow name="partner-payload-cup_card-validation-v2" doc:id="7fd1890e-cb76-4606-9f3b-e6ec4c1d0c3a" >
+	<choice doc:name="Choice" doc:id="4964c233-b8a4-4a52-87ed-cac4b5c862a8">
+            <when expression='payload.ApplicantType == "NonNRA"'>
+                <set-variable value="createAccountSchemaCupCardV2" doc:name="Set Variable" doc:id="608590e1-ad57-4b82-850d-c14120d9ff97" variableName="schema" />
+				<java:invoke-static doc:name="Invoke static" doc:id="959efaca-f8bb-41d8-a9a3-780259974a40" class="com.velo.Validation" method="validate(LinkedHashMap,String)" target="errorList">
+					<java:args ><![CDATA[#[{arg0: vars.payloadMap,arg1: vars.schema}]]]></java:args>
+				</java:invoke-static>
+            
+
+</when>
+			<otherwise>
+                <set-variable value="Not a valid ApplicantType" doc:name="Set Variable" doc:id="09456d9b-789c-4a9b-acfa-45b018582288" variableName="errorList" />
+            </otherwise>
+        </choice>
+	</sub-flow>
+
+</mule>

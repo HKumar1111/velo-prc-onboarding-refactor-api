@@ -1,0 +1,23 @@
+{
+  "definitions": {}, 
+  "$schema": "http://json-schema.org/draft-07/schema#", 
+  "$id": "http://example.com/root.json", 
+  "type": "object", 
+  "title": "The Root Schema", 
+  "required": [
+    "ApplicationId"
+  ], 
+  "properties": {
+    "ApplicationId": {
+      "$id": "#/properties/RequestUUID", 
+      "type": "string", 
+      "title": "The Application Id Schema", 
+      "default": "", 
+      "examples": [
+        "APP-M-03447",
+		"APP-M-03448"
+      ], 
+      "pattern": "^(.*)$"
+    }
+  }
+}

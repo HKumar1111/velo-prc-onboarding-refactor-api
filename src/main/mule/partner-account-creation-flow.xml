@@ -1,0 +1,992 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq"
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:java="http://www.mulesoft.org/schema/mule/java"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd">
+	<flow name="partner-account-creation-flowFlow" doc:id="32a33e5c-9343-4e1b-8185-da38e4305623" >
+	<ee:transform doc:name="Transform Message" doc:id="04d466e1-6eb4-4ba5-9c2b-c3b7d3e49622">
+            <ee:message />
+            <ee:variables>
+				<ee:set-variable variableName="applicationStatus" ><![CDATA[%dw 2.0
+output application/json
+---
+payload..VerificationResults[0] default null]]></ee:set-variable>
+				<ee:set-variable variableName="Operation" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Operation default null]]></ee:set-variable>
+				<ee:set-variable variableName="payloadMap" ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-variable>
+				<ee:set-variable variableName="InputPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+				<ee:set-variable variableName="PartnerId" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Partner.PartnerId]]></ee:set-variable>
+            
+</ee:variables>
+        </ee:transform>
+        <ee:transform doc:name="Transform Message" doc:id="055d898b-bb36-4e64-9199-b2aa488a607d">
+					<ee:message>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="documentNationalId"><![CDATA[%dw 2.0
+output application/json
+---
+payload.Documents filter ($.DocumentName == "NationalId") default []]]></ee:set-variable>
+				<ee:set-variable variableName="mailingAddress" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Customer.Addresses filter (($.Type == "MailingAddress") or ($.Type == "ChineseMailingAddress")) default null]]></ee:set-variable>
+				<ee:set-variable variableName="primaryAddress" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Customer.Addresses filter ($.Type == "PrimaryAddress") default null]]></ee:set-variable>
+				<ee:set-variable variableName="primaryChineseAddress" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Customer.Addresses filter ($.Type == "PrimaryChineseAddress") default null]]></ee:set-variable>
+<ee:set-variable variableName="mailingChineseAddress" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Customer.Addresses filter ($.Type == "MailingChineseAddress") default null]]></ee:set-variable>
+				<ee:set-variable variableName="customerNameEnglish" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Customer.Names filter ($.Type == "English")]]></ee:set-variable>
+				<ee:set-variable variableName="customerNameChinese" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Customer.Names filter ($.Type == "Chinese")]]></ee:set-variable>
+					</ee:variables>
+					
+				</ee:transform>
+		
+		<flow-ref doc:name="partner-payload-validation" doc:id="cfb055a1-b2a7-4182-8c02-3786a9dfdf15" name="partner-payload-validation"/>
+		<flow-ref doc:name="SalesforceMainFlow" doc:id="c211e12e-c906-49de-8322-080a397f8252" name="SalesforceMainFlow"/>
+		<flow-ref doc:name="createAccountPostSchemaValidation" doc:id="ef645584-81f5-4615-aac3-8da56f7076cf" name="createAccountPostSchemaValidation" />
+		<error-handler>
+            <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="0894ed9d-66d1-4170-b293-5f9861ecc5e1">
+                <ee:transform doc:name="Error Response" doc:id="ce7948c8-334b-4ca8-a81b-6c459a6ba676">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message": "failed",
+	"ApplicationId": vars.applicationData.id,
+	"ApplicationName": vars.applicationName.Name,
+	"ResponseCode": if(error.errorType.identifier == "UNAUTHORIZED" )
+        			401
+        		else
+        			400,
+    "Reasons": [{
+    	"ReasonCode": if(error.errorType.identifier == "UNAUTHORIZED" )
+        			401
+        		else
+        			400,
+     	"ReasonDescription":  if (vars.functionalError != null) 
+     							vars.functionalError 	
+     						  else 
+     						  	" Exception found in Experience Flow "
+        
+    }]
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/json
+---
+if(error.errorType.identifier == "UNAUTHORIZED" )
+	"401"
+else
+	"400"]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-continue>
+        </error-handler>
+	</flow>
+	<sub-flow name="partner-payload-validation" doc:id="9db07455-90ed-4821-83d6-33efc50b55da" >
+	<choice doc:name="Choice" doc:id="95860016-69ab-4a1a-845d-a8e39e369f0f">
+            <when expression='payload.ApplicantType == "NonNRA"'>
+                <set-variable value="createAccountSchemaNoNNRA" doc:name="Set Variable" doc:id="560f56c1-6d73-4764-a685-7800d99d2dbb" variableName="schema" />
+				<java:invoke-static doc:name="Invoke static" doc:id="bfa66fce-b006-404c-93d2-ff145fdde591" class="com.velo.Validation" method="validate(LinkedHashMap,String)" target="errorList">
+					<java:args ><![CDATA[#[{arg0: vars.payloadMap,arg1: vars.schema}]]]></java:args>
+				</java:invoke-static>
+				
+				<choice doc:name="Choice" doc:id="d9b23638-660c-4141-ba91-1f9262a8a992" >
+					<when expression="#[sizeOf(vars.documentNationalId) &gt;0]">
+						<logger level="INFO" doc:name="Logger" doc:id="d6584b52-f522-4deb-9268-c1596a5271fe" message="Payload validator"/>
+						<choice doc:name="Choice" doc:id="6e22a6de-911c-4b00-88ff-76a855baead7" >
+			<when expression='#[vars.documentNationalId.DocumentFrontImage == null or vars.documentNationalId.DocumentBackImage == null]' >
+				<ee:transform doc:name="Transform Message" doc:id="93aa941a-7a01-4cf7-89d5-c5ea698102f1">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+						<ee:set-variable variableName="docErrorList" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	
+	ResponseCode : 600,
+	ResponseDescription : "required key [DocumentFirstName Or DocumentBackImage] not found for fields #/Documents/"
+	
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+				<ee:transform doc:name="Transform Message" doc:id="73798f37-8ee2-4a31-87bc-570b7abe9649" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="errorList" ><![CDATA[%dw 2.0
+output application/json
+---
+
+	
+	(vars.errorList default []) as Array ++ [{ResponseCode : 600,
+	ResponseDescription : "required key [NationalID DocumentFrontImage Or DocumentBackImage] not found for fields #/Documents/"}]
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="28771f73-0fd5-4d7f-b89c-8773e0ed4dae" message="Document validation is good"/>
+			</otherwise>
+		</choice>
+					</when>
+					<otherwise>
+						<logger level="INFO" doc:name="Logger" doc:id="4fe1f476-c188-4a8e-8bcf-31e803c4a92b" message="Document object is null"/>
+					</otherwise>
+				</choice>
+            
+</when>
+            <when expression='payload.ApplicantType == "NRA-CHN"'>
+                <set-variable value="createAccountSchema" doc:name="Set Variable" doc:id="b052af85-8970-435d-a92f-f1b0ac0ddd62" variableName="schema" />
+				<java:invoke-static doc:name="Invoke static" doc:id="821f7774-b7b8-487a-8dd8-d3f4daefab97" class="com.velo.Validation" method="validate(LinkedHashMap,String)" target="errorList">
+					<java:args ><![CDATA[#[{arg0: vars.payloadMap,arg1: vars.schema}]]]></java:args>
+				</java:invoke-static>
+				
+				<java:invoke-static doc:name="AddressValidation" doc:id="1e525441-f2db-4dde-b43e-abe1189a452b" class="com.velo.AddressValidation" method="validation(LinkedHashMap)" target="addressErrorList">
+					<java:args ><![CDATA[#[{arg0: vars.payloadMap}]]]></java:args>
+				</java:invoke-static>
+				<ee:transform doc:name="Transform Message" doc:id="e47d96a2-b0d5-47d4-ad8a-82082b9d452d">
+					<ee:message>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="errorList" ><![CDATA[%dw 2.0
+output application/json
+---
+vars.errorList ++ vars.addressErrorList
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				
+				<flow-ref doc:name='customerNameSize-validation' doc:id="8ad91063-d604-42ac-9723-89fa7c9dd56f" name="customerNameSize-validation"/>
+				<choice doc:name="Choice" doc:id="44e13876-58d2-4f00-8562-1c5eef117900" >
+			<when expression="#[((vars.documentNationalId.DocumentFrontImage == null or vars.documentNationalId.DocumentBackImage == null) and vars.isReSubmit == false)]" >
+				<ee:transform doc:name="Transform Message" doc:id="e2cab128-c662-412a-b48d-a3aa7165a17a">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+						<ee:set-variable variableName="docErrorList" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	
+	ResponseCode : 600,
+	ResponseDescription : "required key [DocumentFirstName Or DocumentBackImage] not found for fields #/Documents/"
+	
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+				<ee:transform doc:name="Transform Message" doc:id="569d0829-c0d3-4951-ae49-843a735868b7" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="errorList" ><![CDATA[%dw 2.0
+output application/json
+---
+
+	
+	(vars.errorList default []) as Array ++ [{ResponseCode : 600,
+	ResponseDescription : "required key [NationalID DocumentFrontImage Or DocumentBackImage] not found for fields #/Documents/"}]
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="15bce9a0-30a3-4e1f-895a-9be70bb4f6b2" />
+			</otherwise>
+		</choice>
+            
+</when>
+            <otherwise>
+                <set-variable value="Not a valid ApplicantType" doc:name="Set Variable" doc:id="bc604d65-a0bc-4392-ba30-81c2567c5fbe" variableName="errorList" />
+            </otherwise>
+        </choice>
+		<ee:transform doc:name="Validate Country Dialing Code and Number" doc:id="0069ef32-83b2-4cf2-af3f-34f0a1002fe7" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="errorList" ><![CDATA[%dw 2.0
+output application/java
+var CountryCallingCodesList = ((p("country.callingcodes") default "") splitBy ",")
+---
+if ((vars.errorList != null) and (vars.errorList is String)) 
+	vars.errorList
+else
+	((vars.errorList default []) ++ 
+	((vars.payloadMap.Customer.ContactInformation default []) filter (((CountryCallingCodesList contains $.CountryCode) and (($.Number default "") matches  /^[0-9]{10,11}$/)) and ((sizeOf($.Number) as String) != ((p("country.callingcode." ++ ($.CountryCode))) default "")  ) ) map {
+		"ResponseCode": 600,
+		"ResponseDescription": ("Phone Number " ++ ($.Number default "") ++ " with Calling Code " ++ $.CountryCode ++ " is invalid, it should be of " ++ ((p("country.callingcode." ++ ($.CountryCode))) default "") ++ " digits")	
+	}))]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="createAccountPostSchemaValidation" doc:id="f994851e-4d00-41dd-9177-916eac9fd932">
+        <json-logger:logger doc:name="Flow Start" doc:id="7ca5ceee-44c9-48cf-b917-b948c555b834" message="Schema Validation Done, In createAccountPostSchemaValidation flow" tracePoint="BEFORE_FLOW">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+		<json-logger:logger doc:name="Partner Account Create Request" doc:id="874242ff-256f-4dce-8328-bc93f2847674" priority="DEBUG" tracePoint="PRINT" message="Partner Account Create Request">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{
+ 	"Create-UpdateAccountRequest": payload
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<choice doc:name="Choice" doc:id="60337f20-b8ee-481d-a6ba-92f2a18b988b">
+            <when expression='#[vars.errorList[0] == null and vars.applicationStatus == vars.APPLICATION_VARIABLES.Approved and vars.applicationData.success == true and vars.isSfdcInsertSuccess]'>
+                <logger level="INFO" doc:name="AsyncApprove" doc:id="f349ffe1-2c11-4dc6-964b-2a3d87341429" message="Before Making Call to Async Process" />
+                <async doc:name="Async" doc:id="947612e3-e32a-4d37-a952-c6d4d0055a8f" >
+					<ee:transform doc:name="AppendApplicationId" doc:id="5ff29b56-ea85-467b-8b1d-394fd5fc91fb">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+((vars.InputPayload - "ApplicationId") ++ {"ApplicationId": vars.application.name, "SalesforceApplicationId": vars.applicationData.id})]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<ee:transform doc:name="GeneratePhoneNumber" doc:id="88b0a0f8-0486-4a8e-87ef-f20ab44f004d" >
+						<ee:message >
+							<ee:set-payload resource="partnerMergePhoneAndCode.dwl" />
+						</ee:message>
+					</ee:transform>
+				<ee:transform doc:name="Append IAcceptedDate" doc:id="b2f9fa4d-c2bc-4f00-b01e-3c79abc6811e" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload mapObject {
+	(($$) : if ( ($$ as String) != "Customer")  $
+              else (($) ++ {
+                           ("IAcceptedDate": ($.IAcceptedDateTime default now()) as Date) 
+                           } ++ {
+                           ("IAcceptedTime": ($.IAcceptedDateTime default now()) as Time)
+                           })
+) 
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform> 
+					<logger level="INFO" doc:name="Logger" doc:id="ca8dab1b-cb1d-45ed-b218-d73f06d493f5" message="Before calling Create Acc Process API:#[payload]"/>
+					<async doc:name="Async" doc:id="44ec45d6-aa67-4e48-b590-7d061d711fd5" >
+					<ee:transform doc:name="Transform Message" doc:id="7bc36528-a9fa-425b-9fb1-4473c9c73136" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="log" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	applicationId: vars.applicationData.id,
+	originalPayload: payload mapObject {
+		($$) : if (($$ as String) != "Documents") $ else (($ default []) map ($ - "DocumentFrontImage" - "DocumentBackImage"))
+	},
+	source: "Process API Request"
+}]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<flow-ref doc:name="SalesforceDebug" doc:id="81dd5d41-eb65-4c5d-9433-f125114b7c97" name="salesforcedebuglogFlow"/>
+				</async>
+					<json-logger:logger doc:name="Partner Create Request Payload" doc:id="0218f325-cfa7-4375-8ca8-2ebf91689628" priority="DEBUG" tracePoint="PRINT" endpoint="POST:/${partner.accountcreate.path}" message="Partner Create Request Payload">
+						<json-logger:content ><![CDATA[#[output application/json ---
+{
+ 	"PartnerCreateAccountRequest": payload
+}]]]></json-logger:content>
+					</json-logger:logger>
+					<json-logger:logger doc:name="Partner Create Request" doc:id="df5e88dd-8d31-4c2a-87d3-3d62b5cda2fd" message="Before Partner Create Request" tracePoint="BEFORE_REQUEST" endpoint="POST:/${partner.accountcreate.path}">
+						<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+					</json-logger:logger>
+					<try doc:name="Try" doc:id="e9fcc1c9-b6d1-4ad4-958a-95487cc209a8" >
+						
+							<http:request method="POST" doc:name="Partner Create Request" doc:id="f1997d22-b396-45fe-96d2-b0936488842a" path="/${partner.accountcreate.path}" config-ref="Process_API_Http_Request_Config" target="partApiResp" responseTimeout="${response.timeout.threeMinute}" targetValue="#[output application/json --- payload]">
+                    <http:headers><![CDATA[#[output application/java
+---
+{
+	"X-CORRELATION-ID" : vars.xCorrelationId,
+	"Authorization" : vars.token
+}]]]></http:headers>
+				
+                </http:request>
+						
+						<async doc:name="Async" doc:id="4427fe04-9412-4af0-a345-1b74a996bddc" >
+					<ee:transform doc:name="Transform Message" doc:id="b7d46de1-f759-4c84-898b-48a180ad217a" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="log" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	applicationId: vars.applicationData.id,
+	originalPayload: vars.partApiResp,
+	source: "Process API Response"
+}]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<flow-ref doc:name="SalesforceDebug" doc:id="80e98e7d-737b-49a4-9785-e0374bc125f8" name="salesforcedebuglogFlow"/>
+				</async>
+						<flow-ref doc:name="updateSalesforceAndPartnerEndpoint" doc:id="5238ae35-591d-407b-bb91-05058efee270" name="updateSalesforceAndPartnerEndpoint"/>
+						<error-handler >
+							<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="79f3e423-f31e-425c-b4ff-f21466000f50" >
+								<logger level="INFO" doc:name="Logger" doc:id="bf766efd-acae-43bf-824f-cb13a7b6e631" message="Partner API Account Creation request Failed. #[error]"/>
+								<flow-ref doc:name="generic-exception-Sub_Flow" doc:id="29f8182a-e03c-4f87-a878-80193fba2546" name="generic-exception-Sub_Flow"/>
+								<async doc:name="Async" doc:id="017f2fb5-217f-4867-b7db-6985ea0775a5" >
+					<ee:transform doc:name="Transform Message" doc:id="62fd51f6-396b-46e7-beb3-7ae6f85e4116" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="log" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	applicationId: vars.applicationData.id,
+	originalPayload: error.description,
+	source: "Process API call - exception"
+}]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<flow-ref doc:name="SalesforceDebug" doc:id="49917c7a-b063-47fa-9d04-2799a2632b9d" name="salesforcedebuglogFlow"/>
+				</async>
+								<json-logger:logger doc:name="Log Exception" doc:id="2fc5c71d-5a76-44d0-a9e1-ae79ee2d0efa" message="Partner API Account Creation request Failed" priority="ERROR" tracePoint="EXCEPTION">
+									<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+								</json-logger:logger>
+							</on-error-continue>
+						</error-handler>
+					</try>
+					<json-logger:logger doc:name="Partner Create Response" doc:id="fa6629eb-b98e-4b6b-82ec-b4ec0de81af3" message="After Partner Create Request" tracePoint="AFTER_REQUEST" endpoint="POST:/${partner.accountcreate.path}">
+					<json-logger:content><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+				</json-logger:logger>
+					<json-logger:logger doc:name="Partner Create Response Payload" doc:id="6a8c8caa-11d6-4a31-9234-a849bc682350" priority="DEBUG" tracePoint="PRINT" endpoint="POST:/${partner.accountcreate.path}" message="Partner Create Response Payload">
+						<json-logger:content ><![CDATA[#[output application/json ---
+{
+ 	"PartnerCreateAccountResponse": vars.partApiResp
+}]]]></json-logger:content>
+					</json-logger:logger>
+					<logger level="INFO" doc:name="Logger" doc:id="d5b6b38f-a25b-4d77-a6db-d6a1ff2c6395" message="After Partner Create Request #[vars.partApiResp]" />
+				</async>
+				<set-payload value="#[vars.resp]" doc:name="Set Payload" doc:id="3cd4d7a9-6e1d-4d81-9de6-e960f7740b42" />
+                <ee:transform doc:name="Success Response" doc:id="02918954-4ba0-4371-8536-37b9fc4c266c">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message": "success",	
+	"ApplicationId": vars.application.name,
+	//"ApplicationName": vars.applicationName.Name,
+	//"ApplicationStatus": vars.resp.data.ApplicationStatus default null,
+	"ApplicationStatus": vars.APPLICATION_VARIABLES.Pending,
+	//"CaseNumber": vars.resp.data.CaseNumber default null,
+	"CaseNumber": "",
+	"ResponseCode": 200,
+	"Reasons":[{
+				"ReasonCode": 601,
+				"ReasonDescription": "Account Creation request Submitted Successfully"
+			}]
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </when>
+            <when expression="#[vars.errorList[0] == null and (vars.applicationStatus == vars.APPLICATION_VARIABLES.Pending)]">
+				<logger level="INFO" doc:name="Logger" doc:id="b84aca34-90d2-4e01-9ea7-49204bcb040c" message="Before Making Call to Pending" />
+				<ee:transform doc:name="Transform Message" doc:id="fb85b9f4-a6b5-454c-9a69-a37579a2eea3" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message": "success",
+	"ApplicationId": vars.application.name,
+	"ApplicationStatus": vars.APPLICATION_VARIABLES.Pending,
+	"CaseNumber": "",
+	//"ApplicationName": vars.applicationName.Name,
+	"ResponseCode": 602,
+	"Reasons":[{
+				"ReasonCode": 602,
+				"ReasonDescription": "Awaiting for approved application request"
+			}]
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression="#[vars.errorList[0] == null and (vars.applicationStatus == vars.APPLICATION_VARIABLES.Denied or vars.applicationStatus == vars.APPLICATION_VARIABLES.Declined)]">
+				<logger level="INFO" doc:name="Logger" doc:id="bca56a41-749a-4ac7-afda-33c561fd1c72" />
+				<ee:transform doc:name="Transform Message" doc:id="b3038606-3145-489a-8db3-b1cae7f62af5" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message": "success",
+	"ApplicationId": vars.application.name,
+	"ApplicationStatus": vars.APPLICATION_VARIABLES.Declined,
+	//"ApplicationName": vars.applicationName.Name,
+	"CaseNumber": "",
+	"ResponseCode": 603,
+	"Reasons":[{
+				"ReasonCode": 603,
+				"ReasonDescription": "We do not accept Denied/Declined applications"
+			}]
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression="#[vars.isSfdcInsertSuccess == false]">
+				<logger level="INFO" doc:name="Logger" doc:id="1d42901a-b563-4149-8538-c72ccf23d99e" message="vars.application.name failed to insert/update data to SF"/>
+				<ee:transform doc:name="Transform Message" doc:id="874f319e-d89e-4dca-babb-482dd9c5d53d" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message":"Data Insert or Update failed",
+	"ApplicationId": vars.application.name default null,
+	"ApplicationStatus" : vars.APPLICATION_VARIABLES.Pending,
+	"ResponseCode": 600,
+	"Reasons": [  {
+					"ReasonCode": 601,
+					"ReasonDescription":
+					 	"Unable to Insert/Update data, Caused by data length mismatch or data type mismatch."
+
+				} ]
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise>
+                <ee:transform doc:name="Transform Message" doc:id="5a9cf0f1-cc24-4b75-bc1f-fd53ba7c393f">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message":"Validation Error",
+	"ApplicationId": vars.application.name,
+	"ApplicationStatus" : vars.APPLICATION_VARIABLES.Pending,
+	"ResponseCode": 600,
+	"Reasons": [  {
+					"ReasonCode": 601,
+					"ReasonDescription":
+					if ( sizeOf(vars.errorList) > 0 ) 
+						 vars.errorList  
+					else if (vars.applicationData.errors[0] !=null ) 
+						vars.applicationData.errors[0].message 
+					else if ( sizeOf(vars.errorList) == 0 )
+					 	"Unable to update the system please try again later"					 						
+					else ""
+				} ]
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+				<set-variable value="400" doc:name="Set httpStatus to 400" doc:id="8a3e4250-e708-4701-be2c-946590f6d5d3" variableName="httpStatus"/>
+				<async doc:name="Async" doc:id="4427fe04-9412-4af0-a345-1b74a996bddc" >
+					<ee:transform doc:name="Transform Message" doc:id="b7d46de1-f759-4c84-898b-48a180ad217a" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="log" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	applicationId: vars.applicationData.id,
+	originalPayload: payload,
+	source: "Validation Error"
+}]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<flow-ref doc:name="SalesforceDebug" doc:id="80e98e7d-737b-49a4-9785-e0374bc125f8" name="salesforcedebuglogFlow"/>
+				</async>
+            </otherwise>
+        </choice>
+		<json-logger:logger doc:name="Partner Account Create Response" doc:id="ac31e391-e95d-43a9-b08d-de2d9640f96d" tracePoint="PRINT" message="Final Response to Partner Create/Update Account Request" priority="DEBUG">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{
+ 	"Create-UpdateAccountResponse": payload
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<json-logger:logger doc:name="Flow End" doc:id="139d7db4-b30d-4af2-a142-825ab8796a19" tracePoint="AFTER_FLOW" message="End of createAccountPostSchemaValidation flow">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+		<async doc:name="Async" doc:id="766246ba-3a76-4629-bec9-fc73b2573b2b" >
+			<ee:transform doc:name="Transform Message" doc:id="572d8a43-8d6f-46f8-9970-d608c3c1ab2b" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	applicationId: vars.applicationData.id,
+	originalPayload: payload,
+	source: "API Response"
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<flow-ref doc:name="salesforcedebuglogFlow" doc:id="47c2c10f-066e-492f-ade6-e6592cc7afd0" name="salesforcedebuglogFlow"/>
+		</async>
+		
+    </sub-flow>
+	<flow name="updateSalesforceAndPartnerEndpoint" doc:id="120d5fea-92e5-4ddd-877e-04831778d88b" >
+	<choice doc:name="Choice" doc:id="b29ad690-31b6-4fec-83e6-6abf8cdbb9d8" >
+						<when expression='#[vars.partApiResp..ApplicationStatus[0] == "Approved"]'>
+						<logger level="INFO" doc:name="Logger" doc:id="273f2a0c-19d7-4f2e-99d0-e0ea8ea6d5d3" message="Process API returned application status as #[vars.partApiResp.data.ApplicationStatus]"/>
+				<set-variable value="Account Created Successfully" doc:name="Set Variable" doc:id="7b3c17a9-e75d-44b3-87d4-7e2b038044fd" variableName="reasonDescription"/>
+							
+
+</when>
+			<when expression='vars.msdCaseRejectFlag == "true"'>
+				<logger level="INFO" doc:name="Logger" doc:id="fdef5459-b57e-4b9b-ad18-9e3115ab6b39" message="Application was rejected in MSD"/>
+				<set-variable value="Application was rejected" doc:name="Set Variable" doc:id="9b04cd1e-24d8-4edb-975a-154c483ac0df" variableName="reasonDescription"/>
+			</when>
+			<otherwise >
+								<logger level="INFO" doc:name="Logger" doc:id="ab4b0fd7-1c88-4087-b4ec-1d4e8cccd1cb" message="Process API returned application status as #[vars.partApiResp.data.ApplicationStatus]"/>
+				<set-variable value="Application is under review" doc:name="Set Variable" doc:id="9d9b8ae7-edb8-49ed-b310-7662f5577850" variableName="reasonDescription"/>
+							
+</otherwise>
+						</choice>
+		<flow-ref doc:name="SalesforceUpdateAccAndCISInfo" doc:id="a33fe236-3828-480d-9935-0f32ea0ae651" name="SalesforceUpdateAccAndCISInfo" />
+		<ee:transform doc:name="Transform Message" doc:id="7e7becab-52b2-4675-857f-b7d209aea9a3">
+					<ee:message>
+					</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="updateApplicationReq" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"requestUuid": vars.RequestUUID default null,
+	"applicationStatus": vars.partApiResp..ApplicationStatus[0],
+	"caseNumber": vars.partApiResp..CaseNumber[0],
+	"reasons": 
+	[
+		if(vars.partApiResp..ApplicationStatus[0] == "Approved") 
+		({
+			"reasonCode": "200",
+			"reasonDescription": vars.reasonDescription	
+		}) else
+		({
+			"reasonCode": "300",
+			"reasonDescription": vars.reasonDescription	
+		})
+	],
+	"cisNumber": vars.partApiResp.data.EnCustomerNumber default null,
+	"accountNumbers":
+	[
+		{
+			"type": "US Checking",
+			"accountNumber": vars.partApiResp.data.EnAccountNumber default null
+		}	
+	]
+}]]></ee:set-variable>
+			
+</ee:variables>
+				</ee:transform>
+				<async doc:name="Async" doc:id="1ea4a784-fe80-44f8-a4fc-3b51de5b75bb" >
+					<ee:transform doc:name="Transform Message" doc:id="d21de9e9-333e-4926-b5d7-569561e64028" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="log" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	applicationId: vars.applicationData.id,
+	originalPayload: vars.updateApplicationReq,
+	source: "Partner Account Update Request"
+}]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<flow-ref doc:name="SalesforceDebug" doc:id="ede5eb08-90b2-4c9c-9a83-b7c969a9e9af" name="salesforcedebuglogFlow"/>
+				</async>
+		<json-logger:logger doc:name="Logger" doc:id="c5df247a-8da1-4e6d-9ef1-3bce6538785e" tracePoint="BEFORE_REQUEST" message="Before calling Partner Update account ">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{
+ 	updateApplicationReq: vars.updateApplicationReq
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<logger level="INFO" doc:name="Logger" doc:id="fc169345-4d02-42c6-8bb2-c227a8f50eb6" message="Partner update account request : #[vars.updateApplicationReq]"/>
+		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="44e6dcff-e3f1-42fb-aead-400a11f95ee4" />
+		<choice doc:name="Choice" doc:id="9b901ff9-728f-4cab-8de9-9365cbc0909f" >
+			<when expression="vars.APPLICATION_VARIABLES.BBAE_PARTNER_ID == vars.PartnerId">
+				<flow-ref doc:name="updateBBAEApplication" doc:id="32df00c0-a8ce-4243-9650-b71cd39bba73" name="updateBBAEApplication"/>
+			</when>
+			<when expression="vars.APPLICATION_VARIABLES.WEBULL_PARTNER_ID == vars.PartnerId">
+				<flow-ref doc:name="updateWEBULLApplication" doc:id="d1cdaf09-b645-488c-872f-924e9bbf2aee" name="updateWEBULLApplication"/>
+			</when>
+			<otherwise >
+				<json-logger:logger doc:name="Logger" doc:id="74361305-f216-46ef-8b73-c51be137142a" tracePoint="PRINT" message="PartnerId is null or Invalid partner id given. Skipping partner update application">
+					<json-logger:content ><![CDATA[#[output application/json ---
+{
+ 	partnerId: vars.PartnerId
+}]]]></json-logger:content>
+				</json-logger:logger>
+			</otherwise>
+		</choice>
+	
+
+</flow>
+	<flow name="updateBBAEApplication" doc:id="b21fba98-936b-4c51-a853-9bb1ef410bc1" >
+		<json-logger:logger doc:name="Update BBAE Application" doc:id="a11947cf-e725-4d5a-8261-351e4379f4a1" tracePoint="BEFORE_FLOW" message="BBAE Application start">
+			<json-logger:content><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+		<flow-ref doc:name="getBBAESecurityToken" doc:id="096af71d-b057-4eb7-84dd-2620d60dbc5b" name="getBBAESecurityToken" />
+		<choice doc:name="Choice" doc:id="55a3fb29-1951-4203-8edc-4abf29cce65a">
+			<when expression="#[vars.partnerToken.status == 0]">
+				<json-logger:logger doc:name="Partner Update Application Request payload" doc:id="361fa773-c492-4576-b9ee-1a35654b697c" priority="DEBUG" tracePoint="PRINT" endpoint="POST:/${bbaeEndPoint.updateApplication.path}" message="BBAE Partner Update Application Request payload">
+					<json-logger:content ><![CDATA[#[output application/json ---
+{
+ 	"BBAEPartnerUpdateApplicationRequest": vars.updateApplicationReq
+}]]]></json-logger:content>
+				</json-logger:logger>
+				<json-logger:logger doc:name="Partner Update Application Request" doc:id="32a98041-f6fb-41c6-92c2-dc76d4649313" endpoint="POST:/${bbaeEndPoint.updateApplication.path}" message="BBAE Partner Update Application Request">
+					<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+				</json-logger:logger>
+				<http:request method="POST" doc:name="PartnerUpdateApplicationRequest" doc:id="604b839d-8435-41ac-a87f-e19ae81c5a0f" config-ref="Partner_Request_configuration" path="/${bbaeEndPoint.updateApplication.path}" target="updateApplicationResp" targetValue="#[output application/json --- payload]">
+			<http:body><![CDATA[#[vars.updateApplicationReq]]]></http:body>
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	"X-BBAE-Token" : vars.partnerToken.result.token
+}]]]></http:headers>
+		</http:request>
+				<logger level="INFO" doc:name="Logger" doc:id="faead538-51ac-4e8e-8a0b-56225b370bdb" message="Partmer Update Application Response : #[vars.updateApplicationResp]" />
+				<async doc:name="Async" doc:id="1ea4a784-fe80-44f8-a4fc-3b51de5b75bb">
+					<ee:transform doc:name="Transform Message" doc:id="d21de9e9-333e-4926-b5d7-569561e64028">
+						<ee:message>
+						</ee:message>
+						<ee:variables>
+							<ee:set-variable variableName="log"><![CDATA[%dw 2.0
+output application/json
+---
+{
+	applicationId: vars.applicationData.id,
+	originalPayload: vars.updateApplicationResp,
+	source: "Partner Account Update Response"
+}]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<flow-ref doc:name="SalesforceDebug" doc:id="ede5eb08-90b2-4c9c-9a83-b7c969a9e9af" name="salesforcedebuglogFlow" />
+				</async>
+				<json-logger:logger doc:name="Partner Update Application Response" doc:id="42bc9e22-c655-4d83-a367-9490c54ec2c8" tracePoint="AFTER_REQUEST" message="BBAE Partner Update Application Response " endpoint="POST:/${bbaeEndPoint.updateApplication.path}">
+			<json-logger:content><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+				<json-logger:logger doc:name="Partner Update Application Response payload" doc:id="1213873b-2f78-4712-90e6-643b6d6f0e5e" endpoint="POST:/${bbaeEndPoint.updateApplication.path}" priority="DEBUG" tracePoint="PRINT" message="BBAE Partner Update Application Response payload">
+					<json-logger:content ><![CDATA[#[output application/json ---
+{
+ 	"BBAEPartnerUpdateApplicationResponse": vars.updateApplicationResp
+}]]]></json-logger:content>
+				</json-logger:logger>
+			</when>
+			<otherwise>
+				<logger level="INFO" doc:name="Logger" doc:id="5b939804-3590-46f9-963b-2229f1d9500d" message="Unable to generate Partner token for #[vars.RequestUUID]" />
+				<json-logger:logger doc:name="Logger" doc:id="84fbb056-1ab0-4a17-972a-3e94e0167590" message="Unable to generate Partner token" tracePoint="PRINT" priority="DEBUG">
+					<json-logger:content><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+				</json-logger:logger>
+			</otherwise>
+		</choice>
+		<json-logger:logger doc:name="Update BBAE Application Flow End" doc:id="faff9037-374b-4db2-9e81-33a8385a9f7b" tracePoint="AFTER_FLOW" message="BBAE Application end">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="1fe55308-c8f5-4c48-af2a-09c2eac2b613" >
+				<flow-ref doc:name="generic-exception-Sub_Flow" doc:id="eadfbd6c-9d70-4154-8acf-0a13aecdab4d" name="generic-exception-Sub_Flow"/>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="getBBAESecurityToken" doc:id="81fedb38-f696-4a60-b1fe-1a01c0cd2db7">
+		<set-variable value="#[p('bbaeEndPoint.createSession.basicAuth')]" doc:name="Set BBAE Token" doc:id="aca9155d-895c-4b0e-9cda-3ecaf0e58a46" variableName="bbaeToken" />
+		<json-logger:logger doc:name="Before BBAE Get Security Token" doc:id="ea4a3505-7188-4acb-b537-a1b20268eb5c" tracePoint="BEFORE_REQUEST" message="Before BBAE Get Security Token" endpoint="GET:/${bbaeEndPoint.createSession.path}">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+		<http:request method="GET" doc:name="createSession" doc:id="92a16a11-cb47-4b61-9902-28d4e30ddfe3" target="partnerToken" targetValue="#[output application/json --- payload]" path="/${bbaeEndPoint.createSession.path}" config-ref="Partner_Request_configuration">
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	"Authorization" : vars.bbaeToken
+}]]]></http:headers>
+		</http:request>
+		<json-logger:logger doc:name="After BBAE Get Security Token" doc:id="f1c5c33a-2849-48bb-9960-3c196b2afb2a" tracePoint="AFTER_REQUEST" message="After BBAE Get Security Token" endpoint="GET:/${bbaeEndPoint.createSession.path}">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+	</flow>
+	<flow name="updateWEBULLApplication" doc:id="8a233abc-1378-4dff-8038-19818b0574b3" >
+		<json-logger:logger doc:name="Update WEBULL Application Flow Start" doc:id="1fadd2fe-5378-4453-877a-d5c0a61eb495" tracePoint="BEFORE_FLOW" message="Update WEBULL Application">
+			<json-logger:content><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+		<flow-ref doc:name="getWeBullSignKey" doc:id="9c726992-5863-4670-ba3f-6c5ec9f3e2e7" name="getWeBullSignKey"/>
+		<json-logger:logger doc:name="Partner Update Application Request Payload" doc:id="9228e98f-4c13-4da2-8184-940fd82c556a" priority="DEBUG" tracePoint="PRINT" message="Webull Partner Update Application Request Payload" endpoint="POST:/${webullEndPoint.updateApplication.path}">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{
+ 	"WebullPartnerUpdateApplicationRequest": vars.updateApplicationReq
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<json-logger:logger doc:name="Partner Update Application Response " doc:id="99c4a4f2-8073-4be5-bfbd-244c3df7df19" tracePoint="BEFORE_REQUEST" message="Webull Partner Update Application Response " endpoint="POST:/${webullEndPoint.updateApplication.path}">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+		<http:request method="POST" doc:name="WEBULLPartnerUpdateApplicationRequest" doc:id="246c2bb9-ab91-44ec-946c-654a9e69af3b" config-ref="Webull_Http_Request_Config" path="/${webullEndPoint.updateApplication.path}" target="updateApplicationResp" targetValue="#[output application/json --- payload]">
+			<http:body ><![CDATA[#[vars.updateApplicationReq]]]></http:body>
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"appKey" : p('webullEndPoint.appKey'),
+	"Sign" : vars.weBullSignKey.signKeySHA,
+	"Content-Type" : "application/json"
+}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"reqUUID" : vars.RequestUUID
+}]]]></http:uri-params>
+			<http:response-validator >
+				<http:success-status-code-validator values="200,401,400" />
+			</http:response-validator>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="faead538-51ac-4e8e-8a0b-56225b370bdb" message="Partmer Update Application Response : #[vars.updateApplicationResp]" />
+				<async doc:name="Async" doc:id="1ea4a784-fe80-44f8-a4fc-3b51de5b75bb">
+					<ee:transform doc:name="Transform Message" doc:id="d21de9e9-333e-4926-b5d7-569561e64028">
+						<ee:message>
+						</ee:message>
+						<ee:variables>
+							<ee:set-variable variableName="log"><![CDATA[%dw 2.0
+output application/json
+---
+{
+	applicationId: vars.applicationData.id,
+	originalPayload: vars.updateApplicationResp,
+	source: "Partner Account Update Response"
+}]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<flow-ref doc:name="SalesforceDebug" doc:id="ede5eb08-90b2-4c9c-9a83-b7c969a9e9af" name="salesforcedebuglogFlow" />
+				</async>
+				<json-logger:logger doc:name="Partner Update Application Response" doc:id="42bc9e22-c655-4d83-a367-9490c54ec2c8" tracePoint="AFTER_REQUEST" message="Partner Update Application Response " endpoint="POST:/${webullEndPoint.updateApplication.path}">
+			<json-logger:content><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+		<json-logger:logger doc:name="Partner Update Application Response  payload" doc:id="9b69350e-7815-4bd9-8b9c-6864663db0d0" priority="DEBUG" tracePoint="PRINT" endpoint="POST:/${webullEndPoint.updateApplication.path}" message="Webull Partner Update Application Response ">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{
+ 	"WebullPartnerUpdateApplicationResponse": vars.updateApplicationResp
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<json-logger:logger doc:name="Update WEBULL Application Flow End" doc:id="e67915e1-1cd8-4e62-a0c0-ec9264420428" tracePoint="AFTER_FLOW" message="Update WEBULL Application" >
+			<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+		<error-handler >
+							<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="79f3e423-f31e-425c-b4ff-f21466000f50" >
+				<flow-ref doc:name="generic-exception-Sub_Flow" doc:id="bddf6d9a-603e-4676-810f-94403ecd82b8" name="generic-exception-Sub_Flow"/>
+				<logger level="INFO" doc:name="Logger" doc:id="bf766efd-acae-43bf-824f-cb13a7b6e631" message="Partner Update API request Failed. #[error]"/>
+								<json-logger:logger doc:name="Logger" doc:id="429e053c-116a-4c0e-b1d9-a7ffe1fdf0d3" message="Partner Update API request Failed - In Exception Block" priority="ERROR" tracePoint="EXCEPTION">
+					<json-logger:content ><![CDATA[#[output application/json ---
+{
+ 	
+}]]]></json-logger:content>
+				</json-logger:logger>
+				<async doc:name="Async" doc:id="017f2fb5-217f-4867-b7db-6985ea0775a5" >
+					<ee:transform doc:name="Transform Message" doc:id="62fd51f6-396b-46e7-beb3-7ae6f85e4116" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="log" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	applicationId: vars.applicationData.id,
+	originalPayload: error.description,
+	source: "WeBull Update API call - exception"
+}]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<flow-ref doc:name="SalesforceDebug" doc:id="49917c7a-b063-47fa-9d04-2799a2632b9d" name="salesforcedebuglogFlow"/>
+				</async>
+								<json-logger:logger doc:name="Logger" doc:id="2fc5c71d-5a76-44d0-a9e1-ae79ee2d0efa" message="Partner Update API request Failed - In Exception Block" tracePoint="EXCEPTION" priority="ERROR">
+					<json-logger:content ><![CDATA[#[output application/json ---
+{
+ 	
+}]]]></json-logger:content>
+				</json-logger:logger>
+							</on-error-continue>
+						</error-handler>
+	</flow>
+	<flow name="getWeBullSignKey" doc:id="bd56f0ae-3482-4c70-add8-a43dc0cbc823" >
+	<ee:transform doc:name="Transform Message" doc:id="9e3dfb77-77c2-4687-b282-5c4dd72b0086" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="toBase64EncodedeValue" ><![CDATA[%dw 2.0
+import * from dw::core::Binaries
+output application/json
+---
+{
+	"myBinary": toBase64(p('webullEndPoint.appSecret') ++ "&" ++ vars.RequestUUID)  
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="e155349c-d3bc-4336-9c24-333e2869073d" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="weBullSignKey" ><![CDATA[%dw 2.0
+import java!utils::MyUtils
+output application/json
+---
+{
+	"signKeySHA" : MyUtils::toSHA256Encode(vars.toBase64EncodedeValue.myBinary)
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="78027a40-cfa4-48df-8f7c-0790e811f4a8" >
+				<flow-ref doc:name="generic-exception-Sub_Flow" doc:id="c3e3f2d1-9f8e-4325-9fc9-8c0e81cf7846" name="generic-exception-Sub_Flow"/>
+				<json-logger:logger doc:name="Logger" doc:id="dfff3566-cb07-4f2d-beac-06ff9b8a193b" message="WeBull Sign Key generation Failed" priority="ERROR" tracePoint="EXCEPTION">
+					<json-logger:content ><![CDATA[#[output application/json ---
+{
+ 	
+}]]]></json-logger:content>
+				</json-logger:logger>
+				<async doc:name="Async" doc:id="cc094db4-7e63-465e-af52-e230a6a7b42c" >
+					<ee:transform doc:name="Transform Message" doc:id="9c22ad5f-40f0-47ec-837e-f0f9dea76584" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="log" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	applicationId: vars.applicationData.id,
+	originalPayload: error.description,
+	source: "WeBull Sign Key Generation - exception"
+}]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<flow-ref doc:name="SalesforceDebug" doc:id="5b8ac4d0-1987-4d94-9032-234c2be9ee7e" name="salesforcedebuglogFlow"/>
+				</async>
+				<json-logger:logger doc:name="Logger" doc:id="b5c1d66d-609d-4867-93a8-f684b3b64636" tracePoint="EXCEPTION" message="WeBull Sign Key generation Failed" priority="ERROR">
+					<json-logger:content ><![CDATA[#[output application/json ---
+{
+ 	
+}]]]></json-logger:content>
+				</json-logger:logger>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<sub-flow name="customerNameSize-validation" doc:id="8157575d-cbbc-4eee-8d84-22c03ea5592d" >
+		<choice doc:name="Choice" doc:id="bbc3df4e-5a16-40c6-b0b7-897404230eb5">
+							<when expression="#[not (sizeOf(vars.customerNameEnglish.FirstName[0])&gt;= p('NAME.ENG_FIRST_NAME_MIN_LENGTH') and sizeOf(vars.customerNameEnglish.FirstName[0])&lt;=p('NAME.ENG_FIRST_NAME_MAX_LENGTH'))]" >
+				<ee:transform doc:name="Transform Message" doc:id="23e1e453-df2d-4ce3-b617-6ca36b433df5" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="errorList" ><![CDATA[%dw 2.0
+output application/json
+---
+
+	
+	(vars.errorList default []) as Array ++ [{ResponseCode : 600,
+	ResponseDescription : "Length of Customer's English FirstName is invalid. Should be in range of 2-20 characters"}]
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<when expression="#[not (sizeOf(vars.customerNameChinese.FirstName[0])&gt;= p('NAME.CHN_FIRST_NAME_MIN_LENGTH')  and  sizeOf(vars.customerNameChinese.FirstName[0])&lt;= p('NAME.CHN_FIRST_NAME_MAX_LENGTH'))]" >
+				<ee:transform doc:name="Transform Message" doc:id="943cff57-bcd2-43a7-b365-4679c12ff893" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="errorList" ><![CDATA[%dw 2.0
+output application/json
+---
+
+	
+	(vars.errorList default []) as Array ++ [{ResponseCode : 600,
+	ResponseDescription : "Length of Customer's Chinese FirstName is invalid. Should be in range of 1-20 characters"}]
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+							<otherwise>
+								<logger level="INFO" doc:name="Logger" doc:id="3484bcfe-58fc-4680-ba23-bc417d4b107e" message="Customer  FirstName is Valid" />
+							</otherwise>
+						</choice>
+		<choice doc:name="Choice" doc:id="f6077410-a5c9-45db-9ae2-224a226bf7c8" >
+			<when expression="#[not (sizeOf(vars.customerNameEnglish.LastName[0])&gt;= p('NAME.ENG_LAST_NAME_MIN_LENGTH')  and  sizeOf(vars.customerNameEnglish.LastName[0])&lt;= p('NAME.ENG_LAST_NAME_MAX_LENGTH'))]">
+				<ee:transform doc:name="Transform Message" doc:id="1c1e66a2-6cc2-44ce-8f9f-99ba16f86598">
+					<ee:message>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="errorList" ><![CDATA[%dw 2.0
+output application/json
+---
+
+	
+	(vars.errorList default []) as Array ++ [{ResponseCode : 600,
+	ResponseDescription : "Length of Customer's English LastName is invalid. Should be in range of 2-19 characters"}]
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<when expression="#[not (sizeOf(vars.customerNameChinese.LastName[0])&gt;= p('NAME.CHN_LAST_NAME_MIN_LENGTH')  and  sizeOf(vars.customerNameChinese.LastName[0])&lt;=p('NAME.CHN_LAST_NAME_MAX_LENGTH'))]">
+				<ee:transform doc:name="Transform Message" doc:id="bc110201-1b49-4a55-8e9e-cba5d64e458a">
+					<ee:message>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="errorList" ><![CDATA[%dw 2.0
+output application/json
+---
+
+	
+	(vars.errorList default []) as Array ++ [{ResponseCode : 600,
+	ResponseDescription : "Length of Customer's Chinese LastName is invalid. Should be in range of 1-19 characters"}]
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="95719bb4-92ac-4bd9-bd1a-63dacf36896f" message="Customer LastName is Valid"/>
+			</otherwise>
+		</choice>
+	</sub-flow>
+	</mule>

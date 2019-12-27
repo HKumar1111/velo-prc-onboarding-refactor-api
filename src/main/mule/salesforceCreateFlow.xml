@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+<flow name="salesforceCreateFlow" doc:id="87f97797-526d-41ca-a510-2b1addd7004e" >
+		<logger level="INFO" doc:name="Logger" doc:id="7aaa0305-6a2a-4a8a-b935-659d77158c9a" message="Start Salesforce Flow"/>
+		<ee:transform doc:name="Transform Message" doc:id="f800c758-baa0-4626-8d38-c4b6236fef06" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	TF4SF__Product__c: vars.accountTypeMap,	
+	Product_Code__c: vars.payloadMap..AccountType[0] default "Unknown",
+	TF4SF__Sub_Product__c: vars.payloadMap..AccountName[0] default "Unknown",
+	TF4SF__Custom_Text14__c: vars.payloadMap.Customer.PrimaryLanguage default null,
+	TF4SF__City__c: vars.primaryAddress[0].City default "",
+	TF4SF__Country__c:if(vars.primaryAddress[0].CountryCode == "USA") "United States" else "China",
+	TF4SF__State__c: vars.primaryAddress[0].State default "",
+	TF4SF__Street_Address_1__c: vars.primaryAddress[0].StreetAddress1,
+	TF4SF__Street_Address_2__c: vars.primaryAddress[0].StreetAddress2,
+	Street_Address_3__c: vars.primaryAddress[0].StreetAddress3 default "",
+	TF4SF__Zip_Code__c: vars.primaryAddress[0].Zip default "",
+	TF4SF__Country_Code__c:vars.payloadMap.Customer.ContactInformation[0].CountryCode default "",	
+	TF4SF__Created_Channel__c: if(vars.payloadMap.Partner.Channel == "Branch") "Branch" else "Online",
+	TF4SF__Current_Channel__c: if(vars.payloadMap.Partner.Channel == "Branch") "Branch" else "Online",
+	TF4SF__Email_Address__c: vars.payloadMap.Customer.EmailAddress,
+	TF4SF__First_Name__c: vars.customerNameEnglish.FirstName[0] default null,
+	TF4SF__IP_Address__c: vars.payloadMap.Partner.ApplicationIp,
+	TF4SF__Last_Name__c: vars.customerNameEnglish.LastName[0] default null,
+	TF4SF__Mailing_City__c: vars.mailingAddress[0].City default "",
+	TF4SF__Mailing_Country__c: vars.mailingAddress[0].CountryCode default "",
+	Mailing_Country_NRA__c: if(vars.mailingAddress[0].CountryCode == "USA") "United States" else "China",
+	TF4SF__Mailing_State__c: vars.mailingAddress[0].State default "",
+	TF4SF__Mailing_Street_Address_1__c: vars.mailingAddress[0].StreetAddress1,
+	TF4SF__Mailing_Street_Address_2__c: vars.mailingAddress[0].StreetAddress2,
+	Mailing_Street_Address_3__c: vars.mailingAddress[0].StreetAddress3,
+	TF4SF__Mailing_Zip_Code__c: vars.mailingAddress[0].Zip default "",
+	TF4SF__Marital_Status__c: vars.payloadMap.Customer.MaritalStatus,
+	TF4SF__Middle_Name__c: vars.payloadMap.Customer.Names[0].MiddleInitial,
+	TF4SF__Primary_Phone_Number__c: vars.payloadMap.Customer.ContactInformation[0].Number,
+	TF4SF__Application_Status__c: "Submitted",	
+	TF4SF__Sub_Product__c: vars.payloadMap.Accounts[0].AccountName,
+	TF4SF__Submitted_Channel__c: vars.payloadMap.Partner.Channel,
+	TF4SF__Type_of_Checking__c: vars.payloadMap.Accounts[0].AccountName,
+	TF4SF__Type_of_Savings__c: vars.payloadMap.Accounts[0].AccountName,
+	Custom_Picklist9__c: vars.payloadMap.Customer.NonResidentAccountInformation.VisaType default null,
+	Preferred_First_Name__c: vars.payloadMap.Customer.NonResidentAccountInformation.PreferredName default null,
+	Custom_Text17__c: vars.payloadMap.Customer.NonResidentAccountInformation.ForeignTaxNumber default null
+}
+]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+			</ee:variables> 
+		
+</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="afbaae06-5196-4940-a059-ed20c728d638" message="the salesforce payload :: #[output application/json --- payload]"/>
+		<until-successful maxRetries="2" doc:name="Until Successful" doc:id="b46c2fe1-8245-4987-81a6-0dfc270476a8" millisBetweenRetries="${RETRIES_INTERVALS.SF_CONNECTER_RETRY}">
+			<salesforce:create-single doc:name="Create Application Object" doc:id="955f0ec8-8d79-4a6f-bc37-adee37c62b14" config-ref="Salesforce_Config" target="applicationData" type="TF4SF__Application__c" />
+		</until-successful>
+		<choice doc:name="If Application Object Created?" doc:id="5101071f-3196-46cf-b04d-14ae58b959f1" >
+			<when expression="#[vars.applicationData.success == true]">
+				<logger level="INFO" doc:name="Application Id" doc:id="8f931088-8243-4dc9-a5ca-7f64603a0e0e" message="Application Id = #[vars.applicationData.id]" />
+				<salesforce:query-single doc:name="Get Application Name" doc:id="3f5ae673-9005-40ad-b821-fe3f0f4e44e5" config-ref="Salesforce_Config" target="applicationName">
+					<salesforce:salesforce-query >SELECT Name FROM TF4SF__Application__c WHERE Id =':id'</salesforce:salesforce-query>
+					<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"id" : vars.applicationData.id
+}]]]></salesforce:parameters>
+				</salesforce:query-single>
+				<ee:transform doc:name="Set Application Variables" doc:id="e98ad7c6-077f-43f0-868b-913d24ba1ada">
+					<ee:message>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="application" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	name: vars.applicationName.Name,
+	id: vars.applicationData.id
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="167de231-e45a-432a-9bac-325977a1b2d5" variableName="tmpSGPayload"/>
+				<scatter-gather doc:name="Scatter-Gather" doc:id="5177a248-32fb-4dda-a54d-200091a7168a" >
+					<route >
+						
+						<logger level="INFO" doc:name="Logger" doc:id="b5b13e85-786c-408b-af04-e58e122b6650" message="Before calling EmployeInfo Object"/>
+						<flow-ref doc:name="updateEmploymentInfoFlow" doc:id="ae690320-18a7-45b0-b6a9-a78af50c51b1" name="updateEmploymentInfoFlow" />
+						<logger level="INFO" doc:name="Logger" doc:id="15336edb-f968-4335-b74f-b8057c059afe" message="#[vars.employmentData]" />
+					</route>
+					<route >
+						<flow-ref doc:name="updateIdentificationInfoFlow" doc:id="9e33442e-a54b-4996-8cae-84ebe4d1c550" name="updateIdentificationInfoFlow" />
+						<logger level="INFO" doc:name="Logger" doc:id="8b890b2f-8c11-479f-9a63-ee2c090d715f" message="Identity Id = #[vars.identityData]" />
+					</route>
+					<route >
+						<flow-ref doc:name="uploadAttachments" doc:id="b72f2ed8-8601-470f-9365-aaf97b9dd2ed" name="uploadAttachments" />
+					</route>
+				</scatter-gather>
+				<flow-ref doc:name="Salesforce Create Additional Information " doc:id="6203a5b2-dcad-4add-bcfe-376c6c66331f" name="SalesforceCreateAdditionalInformationFlow" />
+				<set-payload value="#[vars.tmpSGPayload]" doc:name="Set Payload" doc:id="824b0ac1-8438-4484-8743-a698482659ec" />
+				<ee:transform doc:name="Transform Message" doc:id="bf6bff95-8941-45e9-bb97-24a7f5cb9d88">
+					<ee:message>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="sfdcInsertStatus" ><![CDATA[%dw 2.0
+output application/json
+---
+{	
+	"ApplicationName": vars.applicationName.Name,
+	"ApplicationData": vars.applicationData,
+	"IdentityInfoData": vars.identityData,	
+	"EmploymentInformationData": vars.employmentData,
+	"uploadDocuments": vars.documentUploadStatus,
+	"additinalInformationCrtResp": vars.additinalInformationCrtResp
+}]]></ee:set-variable>
+						<ee:set-variable variableName="isSfdcInsertSuccess" ><![CDATA[%dw 2.0
+output application/json
+---
+if(vars.applicationData.success and vars.identityData[0].success and vars.employmentData[0].success and vars.additinalInformationCrtResp[0].success)
+	true
+else 
+	false]]></ee:set-variable>
+					</ee:variables>
+				
+</ee:transform>
+			
+</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Unable to create Application Object" doc:id="12d7c381-266c-4015-91e5-d2de688d8c6c" message="Unable to create Application Object"/>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="uploadAttachments" doc:id="a5861b97-c3e2-4943-8201-19936d17997f">
+		<json-logger:logger doc:name="Flow Start" doc:id="334084f8-395a-4abc-90d7-15751c16042f" tracePoint="BEFORE_FLOW" message="Inside uploadAttachments flow">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+		<try doc:name="Try" doc:id="d47339a7-eeb0-4250-b3b3-9fa155fc595a" >
+			<choice doc:name="Choice" doc:id="6a48d0d0-d325-4e62-84c0-5fcdd4fafee7" >
+				<when expression='#[vars.payloadMap.Documents != null]'>
+					<ee:transform doc:name="Transform Message" doc:id="72b36a6a-4485-4bf7-8120-1e72f644fa65">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+							<ee:set-variable variableName="docsAry" ><![CDATA[%dw 2.0
+import * from dw::core::Binaries
+output application/java
+---
+(vars.payloadMap.Documents default []) reduce ((val, acc=[]) -> acc ++
+	[({
+	"Name" : val.DocumentName ++ "_Front." ++ val.DocumentType,
+	"DocumentName" : val.DocumentName ++ "_Front",
+	"Description" : val.DocumentSource,
+	"DocumentType" : val.DocumentType,
+	"ContentType" : if ( null != val.DocumentType and upper(val.DocumentType) == 'PDF')
+             			"application/" ++  val.DocumentType
+             		else 
+             			"image/" ++ val.DocumentType,
+	"Body" : fromBase64(val.DocumentFrontImage),
+	("DocumentDate" : val.DocumentDate as DateTime {format : "yyyy-MM-dd'T'HH:mm:ss.SSSZ"}) if (val.DocumentDate != null)
+}) if (val.DocumentFrontImage != null),
+	({
+	"Name" : val.DocumentName ++ "_Back." ++ val.DocumentType,
+	"DocumentName" : val.DocumentName ++ "_Back",
+	"Description" : val.DocumentSource,
+	"DocumentType" : val.DocumentType,
+	"ContentType" : if ( null != val.DocumentType and upper(val.DocumentType) == 'PDF')
+             			"application/" ++  val.DocumentType
+             		else 
+             			"image/" ++ val.DocumentType,
+		"Body" : fromBase64(val.DocumentBackImage),
+	("DocumentDate" : val.DocumentDate as DateTime {format : "yyyy-MM-dd'T'HH:mm:ss.SSSZ"}) if (val.DocumentDate != null)
+	}) if (val.DocumentBackImage != null)
+]
+)]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+					<ee:transform doc:name="Transform Message" doc:id="a05c49f5-2338-4fe9-bab0-535e1aca96f1">
+						<ee:message>
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="docsReqAry" ><![CDATA[%dw 2.0
+output application/java
+---
+vars.docsAry map {
+	"Document_Name__c" : $.DocumentName,
+	"TF4SF__Application__c" : vars.applicationData.id,
+	"TF4SF__Description__c" : $.Description,
+	"TF4SF__Type__c" : $.DocumentType,
+	"Document_Posted_Timestamp__c" : $.DocumentDate
+}]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<salesforce:create type="TF4SF__Documentation_Request__c" doc:name="Create Document Request" doc:id="7c0a9dec-0cf6-4a65-b669-e82361abcbee" config-ref="Salesforce_Config" target="documentRequestResp">
+						<salesforce:records><![CDATA[#[vars.docsReqAry]]]></salesforce:records>
+					</salesforce:create>
+					<ee:transform doc:name="Transform Message" doc:id="c67d85ee-40b4-4c17-a86b-5caad5ba35c0">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="docsAry"><![CDATA[%dw 2.0
+output application/java
+---
+vars.docsAry map {
+	(($ - "DocumentName" - "DocumentDate" - "DocumentType") ++ { "ParentId" : vars.documentRequestResp[$$].Id } )
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+					<salesforce:create type="Attachment" doc:name="Create Attachments" doc:id="dc9be009-1260-426b-b00e-22ab194d2eae" config-ref="Salesforce_Config" target="documentUploadStatus">
+			<salesforce:records><![CDATA[#[vars.docsAry]]]></salesforce:records>
+		</salesforce:create>
+				</when>
+				<otherwise>
+					<json-logger:logger doc:name="Logger" doc:id="a7231624-ff23-4ba5-a795-13c24fc91eea" tracePoint="PRINT" message="There are no documents to upload">
+						<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+					</json-logger:logger>
+				</otherwise>
+			</choice>
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="63278c8e-4053-4d75-a66b-8e336a878729" >
+					<logger level="INFO" doc:name="Logger" doc:id="6bac9f56-8292-42dc-816b-53e3be6085a9" message="Error in Upload Attachments"/>
+				</on-error-continue>
+			</error-handler>
+		</try>
+		<json-logger:logger doc:name="Flow End" doc:id="6dcc9e18-a43e-4a27-8d17-24cae5140ccc" tracePoint="AFTER_FLOW" message="uploadAttachments flow end">
+			<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+		</json-logger:logger>
+	</flow>
+	<flow name="updateIdentificationInfoFlow" doc:id="37b5027c-ddf3-456a-a9cd-261f2be3ab14" >
+	<try doc:name="Try" doc:id="8ffb03b8-f966-4b4f-af0b-79948ce275dd" >
+			<json-logger:logger doc:name="Flow Start" doc:id="7c0dbcfd-bb88-46ee-a4dc-e8f33856471e" tracePoint="BEFORE_FLOW" message="Before calling IdentifyInfo Object">
+				<json-logger:content><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+			</json-logger:logger>
+			<ee:transform doc:name="Set IdentityInfo" doc:id="04506b6d-4711-46be-bbe6-de5d9bb822cc">
+					<ee:message>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="IdentityInfo"><![CDATA[%dw 2.0
+output application/json
+var isForeignTaxNumber = 
+	if( vars.payloadMap.Accounts.AccountType[0] != "CUP_CARD") 
+		vars.payloadMap.Customer.NonResidentAccountInformation.ForeignTaxNumber 
+	else null
+---
+[{
+	TF4SF__Application__c : vars.applicationData.id,
+	TF4SF__Citizenship__c: vars.payloadMap.Customer.CitizenshipCode,
+	TF4SF__Country_of_Citizenship__c: vars.payloadMap.Customer.CitizenshipCode,
+	TF4SF__Custom_Picklist6__c: if(null != vars.payloadMap.Customer.CountryOfDualCitizenship) 
+									vars.payloadMap.Customer.CountryOfDualCitizenship
+								else if (null != vars.payloadMap.Customer.CountryofDualCitizenship)	
+									vars.payloadMap.Customer.CountryofDualCitizenship
+								else null	,
+	TF4SF__Custom_Text17__c:  isForeignTaxNumber,
+	TF4SF__Date_of_Birth__c: vars.payloadMap.Customer.DateOfBirth as Date {format: "yyyy-MM-dd"}  as String {format: "MM/dd/yyyy"},
+	TF4SF__ID_Type__c: vars.payloadMap.Customer.PrimaryID default null,
+	TF4SF__SSN_Prime__c: vars.payloadMap.Customer.TaxNumber default null,
+	SSN__c: vars.payloadMap.Customer.TaxNumber default null,
+	Place_Of_Birth__c: vars.payloadMap.Customer.BirthPlace default null,
+	Custom_Picklist12__c: vars.payloadMap.Customer.IsPoliticallyExposedPerson,
+	Custom_Picklist13__c: if(vars.payloadMap.ApplicantType == "NonNRA") "Yes" else "No",
+	MID__c: vars.payloadMap.MID default null ,
+	Device_Id__c : vars.payloadMap.Customer.DeviceId default null ,
+	Referral_Code__c : vars.payloadMap.Customer.ReferralCode default null,
+	US_Resident_For_TaxPurpose__c: if(null != vars.payloadMap.Customer.IsUSTaxResident and vars.payloadMap.Customer.IsUSTaxResident == true)
+										"Yes"
+									else if(null != vars.payloadMap.Customer.IsUSTaxResident and vars.payloadMap.Customer.IsUSTaxResident == false)
+										"No"
+									else null
+										
+	
+}]]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="26fca4df-3a38-4913-9384-1c051efdf500" message="IdentityInfo :: #[vars.IdentityInfo]"/>
+			<salesforce:create type="TF4SF__Identity_Information__c" doc:name="Create Identity Information Object" doc:id="8562ac23-6e85-4eb8-8ce3-f46c6d4f49d6" config-ref="Salesforce_Config" target="identityData">
+					<salesforce:records><![CDATA[#[vars.IdentityInfo]]]></salesforce:records>
+				</salesforce:create>
+			<json-logger:logger doc:name="Flow End" doc:id="efe7f731-14a8-4c2e-a99f-3d384df3a7b9" tracePoint="AFTER_FLOW" message="After calling IdentifyInfo Object" >
+				<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+			</json-logger:logger>
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="b2e57162-9517-4618-8505-2f69068a1ec3" >
+					<logger level="INFO" doc:name="Logger" doc:id="73200344-8e7e-4257-974f-5af71a5e26eb" message="Error in Update Identity Info "/>
+				</on-error-continue>
+			</error-handler>
+		</try>
+	</flow>
+	<flow name="updateEmploymentInfoFlow" doc:id="e923a61e-dd12-4d7f-bae1-b80616d560ef" >
+	<try doc:name="Try" doc:id="c9cff6fd-0a2d-404b-a96d-d03fc59e85b3" >
+			<json-logger:logger doc:name="Flow Start" doc:id="ebe8d7ab-5e4a-4358-9add-885809b6c876" tracePoint="BEFORE_FLOW" message="Before calling EmployeInfo Object">
+				<json-logger:content><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+			</json-logger:logger>
+			<ee:transform doc:name="Transform Message" doc:id="1456c918-825e-454b-97ad-929693689811">
+					<ee:message>
+					</ee:message>
+					<ee:variables>
+					<ee:set-variable variableName="employment" ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	TF4SF__Employer__c: vars.payloadMap.Customer.Employer,
+	TF4SF__Employment_Status__c: vars.payloadMap.Customer.EmploymentOrSchool,
+	TF4SF__Application__c : vars.applicationData.id,
+	TF4SF__Occupation__c: vars.payloadMap.Customer.Occupation,
+	PercentShareHolder__c:vars.payloadMap.Customer.TenPercentShareHolder,
+	Position__c: vars.payloadMap.Customer.Position,
+	TF4SF__Years_Emp__c: vars.payloadMap.Customer.YearEmployed,
+	Annual_Income_Range__c: vars.payloadMap.Customer.AnnualIncome,
+	TotalNetWorth__c: vars.payloadMap.Customer.TotalNetWorth,
+	Conduct_International_Transaction_NRA__c: vars.payloadMap.Customer.NonResidentAccountInformation.IntendOutgoingWires as String default null,
+	Excepted_Transactional_NRA__c: vars.payloadMap.Customer.NonResidentAccountInformation.IncomingWiresLimit,
+	International_Transactions_NRA__c: vars.payloadMap.Customer.NonResidentAccountInformation.IntendInternationalWires as String default null,
+	Primary_Income_Source_NRA__c: vars.payloadMap.Customer.NonResidentAccountInformation.SourceOfWealth,
+	Receive_International_Amount__c: vars.payloadMap.Customer.NonResidentAccountInformation.OutgoingWiresLimit,
+	Receive_International_Transactions__c: vars.payloadMap.Customer.NonResidentAccountInformation.IntendIncomingWires as String default null,
+	Employment_Date__c: vars.payloadMap.Customer.EmploymentDate,
+	Primary_Account_Purpose_NRA__c: vars.payloadMap.Customer.NonResidentAccountInformation.PurposeOfAccount
+}]]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			<salesforce:create type="TF4SF__Employment_Information__c" doc:name="Create Employment Information Object Data" doc:id="880d1e13-85e3-4783-b0d1-c1595f62ef1f" config-ref="Salesforce_Config" target="employmentData">
+					<salesforce:records><![CDATA[#[vars.employment]]]></salesforce:records>
+				</salesforce:create>
+			<json-logger:logger doc:name="Flow End" doc:id="60117479-caef-4398-874e-6a935c82d4a6" tracePoint="AFTER_FLOW" message="After calling EmployeInfo Object" >
+				<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+			</json-logger:logger>
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="a1e936fe-7699-4b4e-8202-63f8de399dc8" >
+					<logger level="INFO" doc:name="Logger" doc:id="73f572f8-6d3b-4376-a6f8-57518fe47127" message="Error in Update Employment "/>
+				</on-error-continue>
+			</error-handler>
+		</try>
+	</flow>
+<flow name="salesforcedebuglogFlow" doc:id="c0b163ce-68b3-4be4-9c3e-3b0a6c74dc1c" >
+		<logger level="INFO" doc:name="Logger" doc:id="f1ede337-21f8-4309-b7ca-5f2992577701" message="#[vars.log]"/>
+		<ee:transform doc:name="Transform Message" doc:id="88c7e720-5ee0-48a5-a141-8c97162afb4e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	TF4SF__TimeStamp__c: now() as String {format: "yyyy-MM-dd HH:mm:ss"},
+	TF4SF__Application__c : vars.log.applicationId,
+	TF4SF__Debug_Message__c: write(vars.log.originalPayload, "application/json"),
+	TF4SF__Source__c: if(null != vars.log.source)
+							vars.log.source
+					  else
+						p('variables.APPLICATION.TYPE.API')
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<until-successful maxRetries="3" doc:name="Until Successful" doc:id="90bec7e3-0806-46d5-a4cd-b8ff7a79f393" millisBetweenRetries="10000">
+			<salesforce:create-single type="TF4SF__Debug_Logs__c" doc:name="Debug_Logs" doc:id="8ea9a3c0-2e22-4e7a-a4a6-fff0bf29b457" config-ref="Salesforce_Config" target="DebugLog" targetValue="#[output application/json --- payload]"/>
+		</until-successful>
+		<logger level="INFO" doc:name="Logger" doc:id="02efe32a-32e5-45c9-9892-4e0f01465605" message="DebugLog respons from SF :::::: #[vars.DebugLog] "/>
+	</flow>
+	<flow name="SalesforceCreateAdditionalInformationFlow" doc:id="5ecffe3f-0310-4046-a5e9-50f3c9b1f2e5">
+		<try doc:name="Try" doc:id="2bc1baa0-6411-4612-851e-2f696049baac" >
+			<json-logger:logger doc:name="Flow Start" doc:id="5a645877-f1dd-4ad9-b30c-49cd03dbda29" config-ref="JSON_Logger_Config" tracePoint="BEFORE_FLOW" message="Before calling AdditinalInfo Object">
+				<json-logger:content><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+			</json-logger:logger>
+			<ee:transform doc:name="Transform Message" doc:id="867fe5f6-5536-45fb-b62c-9f6f9ff0f695">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="additionalInformation"><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	Application__c: vars.applicationData.id,
+	Partner_Application_Status__c: vars.payloadMap.Partner.VerificationResults,
+	IsITINAppliedFor__c: vars.payloadMap.Customer.Identification.IsTINAppliedFor as String default null,
+	W8CertificateDate__c: vars.payloadMap.Customer.W8CertificateDate,
+	Mothers_Maiden_Name__c: vars.payloadMap.Customer.MothersMaidenName,
+	Gender__c: vars.payloadMap.Customer.Gender,
+	Mail_Code__c: vars.payloadMap.Customer.MailCode,
+	CountryResidentCode__c: vars.payloadMap.Customer.CountryResidentCode,
+	CountryOfBirthCode__c: vars.payloadMap.Customer.CountryOfBirthCode,
+	PrimaryBanking__c: vars.payloadMap.Customer.PrimaryBanking,
+	EsignDateAccepted__c: vars.payloadMap.Customer.EsignDateAccepted,
+	EsignIsAccepted__c: vars.payloadMap.Customer.EsignIsAccepted,
+	EsignTimeAccepted__c: vars.payloadMap.Customer.EsignTimeAccepted,
+	TermsDateAccepted__c: vars.payloadMap.Customer.TermsDateAccepted,
+	TermsIsAccepted__c: vars.payloadMap.Customer.TermsIsAccepted,
+	TermsTimeAccepted__c: vars.payloadMap.Customer.TermsTimeAccepted,
+	IAccepted__c: vars.payloadMap.Customer.IAccepted,
+	IAcceptedDate__c: vars.payloadMap.Customer.IAcceptedDate,
+	IAcceptedTime__c: vars.payloadMap.Customer.IAcceptedTime,
+	EStatementAccepted__c: vars.payloadMap.Customer.EStatementAccepted,
+	EStatementAcceptedDate__c: vars.payloadMap.Customer.EStatementAcceptedDate,
+	EStatementAcceptedTime__c: vars.payloadMap.Customer.EStatementAcceptedTime,
+	Debit_Card_Failed__c:  false,	
+	W8CertificateType__c: vars.payloadMap.Customer.W8CertificateType,
+	TaxIdType__c: vars.payloadMap.Customer.TaxIdType,
+	Operation__c: vars.payloadMap.Operation,
+	Card_Holder_Name_1__c: vars.payloadMap.Accounts[0].CardHolderName1,
+	Card_Holder_Name_2__c: vars.payloadMap.Accounts[0].CardHolderName2,
+	REQUESTUUID__c: vars.payloadMap.RequestUUID,
+	PartnerId__c: vars.payloadMap.Partner.PartnerId,
+	Partner_Name__c: vars.payloadMap.Partner.PartnerName,
+	CustomerAccountRelationshipCode__c: vars.payloadMap.Accounts[0].CustomerToAccountRelationship[0].CustomerAccountRelationshipCode,
+	NumberOfStatmentCopies__c: vars.payloadMap.Accounts[0].CustomerToAccountRelationship[0].NumberOfStatementCopies,
+	CustomerAccountAssociationType__c: vars.payloadMap.Accounts[0].CustomerToAccountRelationship[0].CustomerAccountAssociationType,
+	Prinmary_Language__c: vars.payloadMap.Customer.PrimaryLanguage,
+	Partner_Application_Status__c: vars.payloadMap.Partner.VerificationResults,
+	// Chinese Primary address in Chinese character 
+	StreetAddress_1__c: vars.primaryChineseAddress[0].StreetAddress1,
+	StreetAddress_2__c: vars.primaryChineseAddress[0].StreetAddress2,
+	StreetAddress_3__c: vars.primaryChineseAddress[0].StreetAddress3,
+	Country_Code__c: vars.primaryChineseAddress[0].CountryCode,
+	Country__c: vars.primaryChineseAddress[0].Country,
+	City__c: vars.primaryChineseAddress[0].City,
+	State__c: vars.primaryChineseAddress[0].State,
+	Zip__c: vars.primaryChineseAddress[0].Zip,
+	Mailing_Street_Address_1__c: vars.mailingChineseAddress[0].StreetAddress1,
+	Mailing_Street_Address_2__c: vars.mailingChineseAddress[0].StreetAddress2,
+	Mailing_Street_Address_3__c: vars.mailingChineseAddress[0].StreetAddress3,
+	Mailing_Country_Code__c: vars.mailingChineseAddress[0].CountryCode,
+	Mailing_Country__c: vars.mailingChineseAddress[0].Country,
+	Mailing_City__c: vars.mailingChineseAddress[0].City,
+	Mailing_State__c: vars.mailingChineseAddress[0].State,
+	Mailing_Zip_Code__c: vars.mailingChineseAddress[0].Zip,
+	Campaign__c: vars.payloadMap.Customer.CampaignId default null,
+	First_Name__c: vars.customerNameChinese.FirstName[0] default null,
+	Last_Name__c: vars.customerNameChinese.LastName[0] default null
+}]]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+			<salesforce:create type="Additional_Information__c" doc:name="Create Additional Infomation" doc:id="6bd1d420-80e3-4646-aa8d-fccee245bcbf" config-ref="Salesforce_Config" target="additinalInformationCrtResp">
+			<salesforce:records><![CDATA[#[vars.additionalInformation]]]></salesforce:records>
+		</salesforce:create>
+			<json-logger:logger doc:name="Flow End" doc:id="4ff47241-f8c3-4c7f-b8d8-c3159d4a08d5" config-ref="JSON_Logger_Config" tracePoint="AFTER_FLOW" message="After calling AdditinalInfo Object" >
+				<json-logger:content ><![CDATA[#[output application/json ---
+{}]]]></json-logger:content>
+			</json-logger:logger>
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="2d3feb20-a846-46a1-9040-3ebbdf14182f" >
+					<logger level="INFO" doc:name="Logger" doc:id="0ccb92d6-8289-4001-a273-2b4ef5f8e7ff" message="Error in Additional Information Create"/>
+				</on-error-continue>
+			</error-handler>
+		</try>
+	</flow>
+</mule>

@@ -1,0 +1,48 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://example.com/root.json",
+    "type": "object",
+    "title": "The Root Schema",
+    "required": [
+        "RequestUUID",
+        "ApplicationId",
+        "Initiator"
+    ],
+    "properties": {
+        "RequestUUID": {
+            "$id": "#/properties/RequestUUID",
+            "type": "string",
+            "title": "The RequestUUID Schema",
+            "examples": [
+                "0-233844f0-49d6-11e9-bbbc-068d31d21576"
+            ],
+            "pattern": "^(.*)$"
+        },
+        "ApplicationId": {
+            "$id": "#/properties/ApplicationId",
+            "type": "string",
+            "title": "The Applicationid Schema",
+            "examples": [
+                "APP-M-04405"
+            ],
+            "pattern": "^(.*)$"
+        },
+        "Initiator": {
+            "$id": "#/properties/Initiator",
+            "type": "string",
+            "title": "The Initiator Schema",
+            "enum": [
+				"Salesforce",
+				"MSD",
+				"Azure"
+			],
+            "examples": [
+                "Salesforce",
+                "MSD",
+                "Azure"
+            ],
+            "pattern": "^(.*)$"
+        }
+    }
+}

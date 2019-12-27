@@ -1,0 +1,80 @@
+{
+	"definitions": {
+		
+	},
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "http://example.com/root.json",
+	"type": "object",
+	"title": "The Root Schema",
+	"required": [
+		"RequestUUID",
+		"ApplicantType",
+		"Partner",
+		"Operation",
+		"Accounts",
+		"Documents",
+		"Customer"
+	],
+	"properties": {
+		"RequestUUID": {
+			"$id": "#/properties/RequestUUID",
+			"type": "string",
+			"title": "The Requestuuid Schema",
+			"default": "",
+			"examples": [
+				"35650bbd-4947-45c4-9113-76a5ce901d5a"
+			],
+			"pattern": "^(.*)$"
+		},
+		"ApplicantType": {
+			"$id": "#/properties/ApplicantType",
+			"type": "string",
+			"title": "The Applicationtype Schema",
+			"default": "",
+			"examples": [
+				"NRA-CHN"
+			],
+			"enum": [
+				"NRA-CHN",
+				"NonNRA"
+			]
+		},
+		"Partner": {
+			"required": [
+				"Channel",
+				"PartnerId",
+				"PartnerName"
+			]
+		},
+		"Operation": {
+			"enum": [
+				"Create",
+				"Update"
+			]
+		},
+		"Accounts": {
+			"required": [
+				"AccountType",
+				"AccountName",
+				"CustomerToAccountRelationship"
+			]
+		},
+		"Documents": {
+			"required": [
+				"DocumentName",
+				"DocumentType",
+				"DocumentFrontImage",
+				"CountryCode"
+			]
+		},
+		"Customer": {
+			"required": [
+				"Names",
+				"DateOfBirth",
+				"Addresses",
+				"EmailAddress",
+				"IsPoliticallyExposedPerson"
+			]
+		}
+	}
+}

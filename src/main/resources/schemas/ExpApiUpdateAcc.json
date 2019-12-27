@@ -1,0 +1,105 @@
+{
+  "definitions": {}, 
+  "$schema": "http://json-schema.org/draft-07/schema#", 
+  "$id": "http://example.com/root.json", 
+  "type": "object", 
+  "title": "The Root Schema", 
+  "required": [
+    "RequestUUID", 
+    "CaseNumber", 
+    "Message", 
+    "CISNumber", 
+    "AccountInformation"
+  ], 
+  "properties": {
+    "RequestUUID": {
+      "$id": "#/properties/RequestUUID", 
+      "type": "string", 
+      "title": "The Requestuuid Schema", 
+      "default": "", 
+      "examples": [
+        "35650bbd-4947-45c4-9113-76a5ce901d5a"
+      ], 
+      "pattern": "^(.*)$"
+    }, 
+    "CaseNumber": {
+      "$id": "#/properties/CaseNumber", 
+      "type": "string", 
+      "title": "The Casenumber Schema", 
+      "default": "", 
+      "examples": [
+        "CAS-03245-X8X6Q9"
+      ], 
+      "pattern": "^(.*)$"
+    }, 
+    "Message": {
+      "$id": "#/properties/Message", 
+      "type": "object", 
+      "title": "The Message Schema", 
+      "properties": {
+        "ReasonCode": {
+          "$id": "#/properties/Message/properties/ReasonCode", 
+          "type": "string", 
+          "title": "The Reasoncode Schema", 
+          "default": "", 
+          "examples": [
+            "300"
+          ], 
+          "pattern": "^(.*)$"
+        }, 
+        "ReasonDescription": {
+          "$id": "#/properties/Message/properties/ReasonDescription", 
+          "type": "string", 
+          "title": "The Reasondescription Schema", 
+          "default": "", 
+          "examples": [
+            "Fraud Detected"
+          ], 
+          "pattern": "^(.*)$"
+        }
+      }
+    }, 
+    "CISNumber": {
+      "$id": "#/properties/CISNumber", 
+      "type": "string", 
+      "title": "The Cisnumber Schema", 
+      "default": "", 
+      "examples": [
+        "abeodeisnsd639dfkf"
+      ], 
+      "pattern": "^(.*)$"
+    }, 
+    "AccountInformation": {
+      "$id": "#/properties/AccountInformation", 
+      "type": "object", 
+      "title": "The Accountinformation Schema", 
+      "default": null, 
+      "required": [
+        "Type", 
+        "AccountNumber"
+      ], 
+      "properties": {
+        "Type": {
+          "$id": "#/properties/AccountInformation/properties/Type", 
+          "type": "string", 
+          "title": "The Type Schema", 
+          "default": "", 
+          "examples": [
+            "Saving"
+          ], 
+          "pattern": "^(.*)$"
+        }, 
+        "AccountNumber": {
+          "$id": "#/properties/AccountInformation/properties/AccountNumber", 
+          "type": "string", 
+          "title": "The Accountnumber Schema", 
+          "default": "", 
+          "examples": [
+            "a12997eisnsd639dfkf"
+          ], 
+          "pattern": "^(.*)$"
+        }
+      }
+    }
+  }
+}
